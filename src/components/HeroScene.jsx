@@ -7,8 +7,7 @@ import StarBorder from './StarBorder';
 import { useSpotlight } from '../hooks/useSpotlight';
 import Saturn from './Saturn';
 
-/**
- * HERO SCENE — Premium entrance with parallax text + Career Mode identity
+/** HERO SCENE — Premium entrance with parallax text + Career Mode identity
  *
  * The Career Mode selector itself now lives in NavBar (single source of
  * truth, persistent across every section). This component only reacts to
@@ -43,6 +42,7 @@ export default function HeroScene() {
       gsap.set('.hero-cta', { y: 20, opacity: 0 });
 
       const tl = gsap.timeline({ 
+        delay: 3,
         defaults: { ease: 'power3.out' },
         scrollTrigger: {
           trigger: heroRef.current,
@@ -85,8 +85,7 @@ export default function HeroScene() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        position: 'relative',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       <div className="sec-wrap">
@@ -100,43 +99,6 @@ export default function HeroScene() {
             gap: 'var(--space-4)',
           }}
         >
-          {/* HERO LABEL (availability badge) */}
-          <div
-            className="hero-fade"
-            style={{
-              fontFamily: 'DM Mono, monospace',
-              fontSize: '0.72rem',
-              letterSpacing: '0.1em',
-              color: 'var(--white)',
-              textTransform: 'uppercase',
-              opacity: 0,
-              transform: 'translateY(20px)',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 16px',
-              borderRadius: '999px',
-              width: 'fit-content',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-            }}
-          >
-            <span
-              style={{
-                display: 'inline-block',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: '#00e676',
-                boxShadow: '0 0 10px #00e676, 0 0 20px #00e676',
-                animation: 'pulse-glow 2s infinite',
-              }}
-            />
-            Available for Full-Time Software &amp; AI Roles
-          </div>
 
           {/* HERO NAME (primary heading) */}
           <h1
@@ -267,24 +229,25 @@ export default function HeroScene() {
           </div>
         </div>
 
-        {/* HERO ACCENT (SATURN) */}
-        <div
-          className="hero-accent"
-          style={{
-            position: 'absolute',
-            top: '50%',
-            right: '-8%',
-            transform: 'translateY(-50%)',
-            width: '30vw',
-            height: '600px',
-            minWidth: '350px',
-            pointerEvents: 'none',
-            zIndex: 0,
-            opacity: 0.9,
-          }}
-        >
-          <Saturn />
-        </div>
+      </div>
+
+      {/* HERO ACCENT (3D SATURN) - Positioned precisely on lower-right, 70-80% visible */}
+      <div
+        className="hero-accent"
+        style={{
+          position: 'absolute',
+          bottom: '-10%',
+          right: '-10%',
+          width: '35vw',
+          height: '35vw',
+          minWidth: '400px',
+          minHeight: '400px',
+          pointerEvents: 'none',
+          zIndex: 0,
+          opacity: 1,
+        }}
+      >
+        <Saturn />
       </div>
     </section>
   );

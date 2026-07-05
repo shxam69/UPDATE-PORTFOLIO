@@ -68,8 +68,23 @@ function App() {
           height: '100vh',
           zIndex: 0,
           pointerEvents: 'none',
+          backgroundColor: '#000000',
         }}
       >
+        <div 
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: 'url(/milkyway.jpg)',
+            backgroundSize: '10%',
+            backgroundPosition: 'top right',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.15,
+          }}
+        />
         <Galaxy 
           mouseRepulsion={true}
           mouseInteraction={true}

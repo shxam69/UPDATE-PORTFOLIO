@@ -1,6 +1,6 @@
 .career-notch-container {
   position: fixed;
-  top: 16px;
+  top: 90px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -58,7 +58,7 @@
 
 @media (max-width: 768px) {
   .career-notch-container {
-    top: 12px;
+    top: 80px;
   }
   
   .notch-btn {

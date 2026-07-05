@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './PremiumGlass.css';
 import { useSpotlight } from '../hooks/useSpotlight';
 import FooterMetaBalls from './FooterMetaBalls';
+import FallingText from './FallingText';
 
 /**
  * CONTACT SCENE v2 — Immersive finale with interactive elements
@@ -32,18 +33,7 @@ export default function ContactScene() {
         },
       });
 
-      // Title reveal with stagger
-      tl.to(
-        '.contact-title-char',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.08,
-          ease: 'bounce.out',
-        },
-        0
-      );
+
 
       // Description fade in
       tl.to(
@@ -125,37 +115,30 @@ export default function ContactScene() {
             CONTACT ME
           </div>
 
-          {/* Title with character stagger */}
-          <h2
-            ref={titleRef}
-            style={{
-              fontSize: 'clamp(3rem, 12vw, 6.5rem)',
-              marginBottom: 'var(--space-8)',
-              lineHeight: 0.95,
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              textShadow: '0 0 30px rgba(255, 51, 68, 0.2)',
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '0.1em',
-            }}
-          >
-            {title.split('').map((char, i) => (
-              <span
-                key={i}
-                className="contact-title-char"
-                style={{
-                  opacity: 0,
-                  transform: 'translateY(-60px)',
-                  display: 'inline-block',
-                  fontSize: 'inherit',
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </h2>
+          {/* Title with FallingText effect */}
+          <div style={{
+            fontFamily: 'Bebas Neue',
+            fontSize: 'clamp(3rem, 12vw, 6.5rem)',
+            marginBottom: 'var(--space-8)',
+            lineHeight: 0.95,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            textShadow: '0 0 30px rgba(255, 51, 68, 0.2)',
+            height: '150px',
+            position: 'relative'
+          }}>
+            <FallingText
+              text="GET IN TOUCH"
+              highlightWords={["IN", "TOUCH"]}
+              highlightClass="contact-highlight"
+              trigger="scroll"
+              backgroundColor="transparent"
+              wireframes={false}
+              gravity={0.56}
+              fontSize="inherit"
+              mouseConstraintStiffness={0.9}
+            />
+          </div>
         </div>
 
         <div

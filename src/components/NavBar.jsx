@@ -247,9 +247,48 @@ export default function NavBar() {
           {/* Career Mode toggle removed and moved to CareerNotch */}
 
           {/* Available indicator */}
-          <div className="navbar__status" aria-label="Availability status: Available">
-            <span className="pulse-dot" aria-hidden="true" />
-            Available
+          <style>{`
+            @keyframes status-pulse {
+              0% { transform: scale(0.9); opacity: 0.7; }
+              50% { transform: scale(1.1); opacity: 1; }
+              100% { transform: scale(0.9); opacity: 0.7; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .navbar__status-dot {
+                animation: none !important;
+                transform: scale(1) !important;
+                opacity: 1 !important;
+              }
+            }
+          `}</style>
+          <div 
+            className="navbar__status" 
+            aria-label="Availability status: Available"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'DM Mono, monospace',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              color: '#f8fafc',
+            }}
+          >
+            <span 
+              className="navbar__status-dot"
+              aria-hidden="true" 
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: '#22c55e',
+                boxShadow: '0 0 12px rgba(34, 197, 94, 0.4)',
+                animation: 'status-pulse 2s ease-in-out infinite'
+              }}
+            />
+            AVAILABLE
           </div>
 
           {/* Resume CTA — swaps with Career Mode */}
