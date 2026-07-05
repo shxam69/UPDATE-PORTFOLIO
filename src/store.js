@@ -1,14 +1,35 @@
 import { create } from 'zustand';
 
-// Scene metadata for cinematic orchestration
+// Scene metadata for cinematic orchestration.
+// NOTE: only `id`, `index`, `name`, and `scrollRange` are read anywhere in the
+// app (see AstroEnvironment / useEngine). Earlier revisions carried a
+// per-scene `ambientColor` (including green/red hues) and `lightIntensity`
+// that were never wired to anything, but were exactly the kind of leftover
+// data that gets "helpfully" re-connected by mistake and reintroduces
+// section-dependent color flashing. Removed on purpose — the atmosphere is
+// driven by a single, stable palette (see AstroEnvironment.jsx), not by
+// per-section color metadata.
 export const SCENES = {
-  HERO: { id: 'hero', index: 0, name: 'Hero', lightIntensity: 1.5, ambientColor: '#f5a623', scrollRange: [0, 0.1] },
-  ABOUT: { id: 'about', index: 1, name: 'About', lightIntensity: 0.5, ambientColor: '#e0e6ed', scrollRange: [0.1, 0.25] },
-  EXPERIENCE: { id: 'experience', index: 2, name: 'Experience', lightIntensity: 0.7, ambientColor: '#8899bb', scrollRange: [0.25, 0.45] },
-  PROJECTS: { id: 'projects', index: 3, name: 'Projects', lightIntensity: 1.2, ambientColor: '#f5a623', scrollRange: [0.45, 0.65] },
-  SKILLS: { id: 'skills', index: 4, name: 'Skills', lightIntensity: 0.6, ambientColor: '#00e676', scrollRange: [0.65, 0.8] },
-  CONTACT: { id: 'contact', index: 5, name: 'Contact', lightIntensity: 0.4, ambientColor: '#ff3344', scrollRange: [0.8, 1.0] },
+  HERO: { id: 'hero', index: 0, name: 'Hero', scrollRange: [0, 0.1] },
+  ABOUT: { id: 'about', index: 1, name: 'About', scrollRange: [0.1, 0.25] },
+  EXPERIENCE: { id: 'experience', index: 2, name: 'Experience', scrollRange: [0.25, 0.45] },
+  PROJECTS: { id: 'projects', index: 3, name: 'Projects', scrollRange: [0.45, 0.65] },
+  SKILLS: { id: 'skills', index: 4, name: 'Skills', scrollRange: [0.65, 0.8] },
+  CONTACT: { id: 'contact', index: 5, name: 'Contact', scrollRange: [0.8, 1.0] },
 };
+
+const TRACK_STORAGE_KEY = 'career-mode-track';
+
+function getInitialTrack() {
+  if (typeof window === 'undefined') return 'software';
+  try {
+    const stored = window.localStorage.getItem(TRACK_STORAGE_KEY);
+    return stored === 'ml' ? 'ml' : 'software';
+  } catch {
+    // localStorage can throw in some privacy modes — fall back silently
+    return 'software';
+  }
+}
 
 export const useStore = create((set, get) => ({
   // Scroll state
@@ -26,14 +47,28 @@ export const useStore = create((set, get) => ({
   currentScene: SCENES.HERO,
   sceneTransitionProgress: 0,
   
-  // Track narrative (software or ml)
-  activeTrack: 'software',
+  // Track narrative (software or ml) — persisted so a returning visitor
+  // keeps their chosen Career Mode across reloads.
+  activeTrack: getInitialTrack(),
+
+  // Bumped on every Career Mode switch. HeroScene depends on this value
+  // to replay its entrance animation (character stagger + fades) instead
+  // of only running once on mount.
+  heroReplayKey: 0,
   
   // Performance monitoring
   fps: 60,
   
   // Setters
-  setActiveTrack: (activeTrack) => set({ activeTrack }),
+  setActiveTrack: (activeTrack) => {
+    if (activeTrack === get().activeTrack) return;
+    try {
+      window.localStorage.setItem(TRACK_STORAGE_KEY, activeTrack);
+    } catch {
+      // ignore write failures (e.g. Safari private mode)
+    }
+    set((state) => ({ activeTrack, heroReplayKey: state.heroReplayKey + 1 }));
+  },
   setScroll: (scroll, scrollProgress) => {
     set({ scroll, scrollProgress });
     

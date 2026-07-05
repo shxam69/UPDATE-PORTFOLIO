@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import CountUp from './CountUp';
+import './PremiumGlass.css';
+import { useSpotlight } from '../hooks/useSpotlight';
 
 const expData = [
   {
@@ -42,6 +44,8 @@ const expData = [
 
 export default function ExperienceScene() {
   const [activeTab, setActiveTab] = useState(expData[0].id);
+  const panelRef = useRef(null);
+  const { onMouseMove: spotlightMove, onMouseLeave: spotlightLeave } = useSpotlight(panelRef);
 
   return (
     <section id="experience" className="scene">
@@ -97,8 +101,13 @@ export default function ExperienceScene() {
                   transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)', 
                   top: 0, 
                   left: 0, 
-                  width: '100%' 
+                  width: '100%',
+                  padding: 'var(--space-8)',
                 }}
+                ref={activeTab === exp.id ? panelRef : null}
+                onMouseMove={activeTab === exp.id ? spotlightMove : undefined}
+                onMouseLeave={activeTab === exp.id ? spotlightLeave : undefined}
+                className="glass-card-premium"
               >
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '.7rem', color: 'var(--amber)', letterSpacing: '.15em', marginBottom: '12px' }}>
                   {exp.period}

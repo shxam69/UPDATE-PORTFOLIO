@@ -7,9 +7,9 @@ export default function MindsetScene() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}>
           {/* How I Think */}
-          <div className="reveal-up glass-panel" style={{ padding: '48px', borderLeft: '4px solid var(--amber)', background: 'rgba(5, 7, 10, 0.4)' }}>
+          <div className="reveal-up solid-panel" style={{ padding: '48px', borderLeft: '4px solid var(--amber)' }}>
             <h3 style={{ fontSize: '2.5rem', marginBottom: '24px', color: 'var(--white)', fontFamily: 'Bebas Neue', letterSpacing: '1px' }}>ARCHITECTURAL PRINCIPLES</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '32px' }}>
               <div>
                 <h4 style={{ fontFamily: 'DM Mono', color: 'var(--amber)', fontSize: '0.9rem', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>▸ DECONSTRUCT COMPLEXITY</h4>
                 <p style={{ color: 'var(--cold)', lineHeight: '1.6', fontSize: '0.95rem' }}>
@@ -37,9 +37,9 @@ export default function MindsetScene() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '40px' }}>
             {/* Engineering Decisions */}
-            <div className="reveal-up glass-panel" style={{ padding: '40px', background: 'rgba(5, 7, 10, 0.4)' }}>
+            <div className="reveal-up solid-panel" style={{ padding: '40px' }}>
               <div style={{ fontFamily: 'DM Mono', fontSize: '0.7rem', color: 'var(--cold2)', marginBottom: '16px', letterSpacing: '0.15em' }}>// DESIGN DECISIONS</div>
               <h3 style={{ fontSize: '2rem', marginBottom: '24px', fontFamily: 'Bebas Neue', letterSpacing: '1px' }}>Engineering Decisions</h3>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -71,7 +71,7 @@ export default function MindsetScene() {
             </div>
 
             {/* Lessons Learned */}
-            <div className="reveal-up glass-panel" style={{ padding: '40px', background: 'rgba(5, 7, 10, 0.4)' }}>
+            <div className="reveal-up solid-panel" style={{ padding: '40px' }}>
               <div style={{ fontFamily: 'DM Mono', fontSize: '0.7rem', color: 'var(--cold2)', marginBottom: '16px', letterSpacing: '0.15em' }}>// SYSTEM DESIGN PRINCIPLES</div>
               <h3 style={{ fontSize: '2rem', marginBottom: '24px', fontFamily: 'Bebas Neue', letterSpacing: '1px' }}>KEY TAKEAWAYS</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

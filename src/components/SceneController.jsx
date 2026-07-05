@@ -19,28 +19,42 @@ export default function SceneController() {
     const scenes = document.querySelectorAll('.scene');
 
     scenes.forEach((scene, index) => {
-      // ─ Entrance animation (fade in + scale) ─
       if (index === 0) {
-        // Hero scene is visible immediately
-        gsap.set(scene, { opacity: 1, scale: 1, y: 0 });
+        gsap.set(scene, { opacity: 1, scale: 1, y: 0, x: 0 });
       } else {
+        const sceneId = scene.id;
+        let fromState = { opacity: 0, y: 40 };
+        
+        if (sceneId === 'about') {
+          fromState = { opacity: 0, x: -60, y: 0, scale: 1 };
+        } else if (sceneId === 'skills') {
+          fromState = { opacity: 0, x: 60, y: 0, scale: 1 };
+        } else if (sceneId === 'experience') {
+          fromState = { opacity: 0, y: 80, x: 0, scale: 1 };
+        } else if (sceneId === 'projects') {
+          fromState = { opacity: 0, y: 60, x: 0, scale: 1 };
+        } else if (sceneId === 'certifications') {
+          fromState = { opacity: 0, y: 30, x: 0, scale: 0.98 };
+        } else if (sceneId === 'contact') {
+          fromState = { opacity: 0, y: 0, x: 0, scale: 0.92 };
+        } else {
+          fromState = { opacity: 0, y: 40, x: 0, scale: 1 }; // fallback
+        }
+
         gsap.fromTo(
           scene,
-          {
-            opacity: 0,
-            scale: 0.97,
-            y: 30,
-          },
+          fromState,
           {
             opacity: 1,
-            scale: 1,
+            x: 0,
             y: 0,
-            duration: 0.8,
+            scale: 1,
+            duration: 0.7,
             ease: 'power2.out',
             scrollTrigger: {
               trigger: scene,
               start: 'top 85%',
-              toggleActions: 'play none none none',
+              toggleActions: 'play none none reverse',
             },
           }
         );
@@ -69,12 +83,12 @@ export default function SceneController() {
 
       gsap.fromTo(el, fromState, {
         ...toState,
-        duration: 0.8,
+        duration: 0.65,
         ease: 'power2.out',
         scrollTrigger: {
           trigger: el,
           start: 'top 90%',
-          toggleActions: 'play none none none',
+          toggleActions: 'play none none reverse',
         },
       });
     });
@@ -122,7 +136,7 @@ export default function SceneController() {
           scrollTrigger: {
             trigger: container,
             start: 'top 85%',
-            toggleActions: 'play none none none',
+            toggleActions: 'play none none reverse',
           },
         }
       );
@@ -196,7 +210,7 @@ export default function SceneController() {
             scrollTrigger: {
               trigger: el,
               start: 'top 85%',
-              toggleActions: 'play none none none',
+              toggleActions: 'play none none reverse',
             },
           }
         );

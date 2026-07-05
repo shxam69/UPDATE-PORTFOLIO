@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import CinematicQuote from './CinematicQuote';
 
 export default function SilenceScene() {
   const textRef = useRef(null);
@@ -27,18 +28,7 @@ export default function SilenceScene() {
           background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent)', 
           margin: '0 auto 60px auto' 
         }}></div>
-        <h2 ref={textRef} style={{ 
-          fontFamily: 'Syne', 
-          fontSize: '1.5rem', 
-          fontWeight: 400, 
-          color: 'var(--cold)', 
-          letterSpacing: '0.02em', 
-          lineHeight: '2',
-          textShadow: '0 0 20px rgba(255,255,255,0.1)'
-        }}>
-          "The best systems don't just solve problems.<br/>
-          <span style={{ color: 'var(--cold2)', fontStyle: 'italic', fontSize: '1.2rem' }}>They are remembered.</span>"
-        </h2>
+        <CinematicQuote />
         <div style={{ 
           width: '1px', 
           height: '120px', 

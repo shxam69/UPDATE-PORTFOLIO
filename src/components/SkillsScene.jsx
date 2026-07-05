@@ -1,98 +1,85 @@
 import { useStore } from '../store';
+import LogoLoop from './LogoLoop';
+
+import {
+  SiSpringboot,
+  SiReact,
+  SiVite,
+  SiThreedotjs,
+  SiGreensock,
+  SiTailwindcss,
+  SiPostgresql,
+  SiFirebase,
+  SiGit,
+  SiGithub,
+  SiDocker,
+  SiPython,
+  SiTensorflow,
+  SiPytorch,
+  SiScikitlearn,
+  SiOpencv,
+  SiPandas,
+  SiNumpy,
+  SiJupyter,
+  SiHuggingface,
+} from 'react-icons/si';
+import { FaJava } from 'react-icons/fa';
 
 const SKILLS_BY_TRACK = {
   software: {
     accent: 'var(--amber)',
-    categories: [
-      {
-        title: 'Languages',
-        items: ['Java (SE/EE)', 'Python (3.x)', 'JavaScript (ES6+)', 'TypeScript', 'C / C++ (17)'],
-      },
-      {
-        title: 'Frontend Development',
-        items: ['React (19)', 'Next.js (App Router)', 'Tailwind CSS', 'GSAP', 'Three.js / Fiber'],
-      },
-      {
-        title: 'Backend & Database',
-        items: ['Node.js', 'Flask', 'RESTful APIs', 'MySQL', 'JWT Auth'],
-      },
-      {
-        title: 'System Design',
-        items: ['Microservices', 'Role-Based Access Control', 'CI/CD', 'API Security', 'Agile / Scrum'],
-      },
+    title: 'Software Engineering Skills',
+    items: [
+      { label: 'Java', icon: FaJava, color: '#f89820' },
+      { label: 'Spring Boot', icon: SiSpringboot, color: '#6db33f' },
+      { label: 'React', icon: SiReact, color: '#61dafb' },
+      { label: 'Vite', icon: SiVite, color: '#646cff' },
+      { label: 'Three.js', icon: SiThreedotjs, color: '#ffffff' },
+      { label: 'GSAP', icon: SiGreensock, color: '#88ce02' },
+      { label: 'Tailwind CSS', icon: SiTailwindcss, color: '#06b6d4' },
+      { label: 'PostgreSQL', icon: SiPostgresql, color: '#336791' },
+      { label: 'Firebase', icon: SiFirebase, color: '#ffca28' },
+      { label: 'Git', icon: SiGit, color: '#f05032' },
+      { label: 'GitHub', icon: SiGithub, color: '#ffffff' },
+      { label: 'Docker', icon: SiDocker, color: '#2496ed' },
     ],
   },
   ml: {
     accent: 'var(--cyan)',
-    categories: [
-      {
-        title: 'Languages',
-        items: ['Python (3.x)', 'NumPy', 'Pandas', 'SQL'],
-      },
-      {
-        title: 'ML Frameworks',
-        items: ['PyTorch', 'TensorFlow', 'Scikit-learn', 'XGBoost / LightGBM'],
-      },
-      {
-        title: 'Applied ML',
-        items: ['Computer Vision (CNNs)', 'NLP', 'Explainable AI (SHAP)', 'Prototype Learning'],
-      },
-      {
-        title: 'Data Science',
-        items: ['Exploratory Data Analysis', 'Feature Engineering', 'PCA / Clustering', 'Streamlit'],
-      },
+    title: 'Machine Learning Skills',
+    items: [
+      { label: 'Python', icon: SiPython, color: '#3776ab' },
+      { label: 'TensorFlow', icon: SiTensorflow, color: '#ff6f00' },
+      { label: 'PyTorch', icon: SiPytorch, color: '#ee4c2c' },
+      { label: 'Scikit-learn', icon: SiScikitlearn, color: '#f7931e' },
+      { label: 'OpenCV', icon: SiOpencv, color: '#5c3ee8' },
+      { label: 'Pandas', icon: SiPandas, color: '#150458' },
+      { label: 'NumPy', icon: SiNumpy, color: '#4dabcf' },
+      { label: 'Jupyter', icon: SiJupyter, color: '#f37626' },
+      { label: 'Hugging Face', icon: SiHuggingface, color: '#ffd21e' },
     ],
   },
 };
 
 export default function SkillsScene() {
   const activeTrack = useStore((state) => state.activeTrack);
-  const { accent, categories } = SKILLS_BY_TRACK[activeTrack] || SKILLS_BY_TRACK.software;
+  const { accent, title, items } = SKILLS_BY_TRACK[activeTrack] || SKILLS_BY_TRACK.software;
 
   return (
     <section id="skills" className="scene">
       <div className="sec-wrap">
-        <div className="sec-label reveal-up">
-          {activeTrack === 'ml' ? 'Machine Learning Skills' : 'Software Engineering Skills'}
+        <div className="sec-label reveal-up" style={{ color: accent }}>
+          {title}
         </div>
-        <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>TECH STACK</h2>
+        <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>
+          TECH STACK
+        </h2>
 
-        <div
-          className="reveal-up"
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}
-        >
-          {categories.map((cat) => (
-            <div
-              key={cat.title}
-              className="glass-panel"
-              style={{
-                padding: '32px 24px',
-                textAlign: 'center',
-                transition: 'all 0.4s',
-                border: '1px solid var(--glass-border)',
-                background: 'rgba(5, 7, 10, 0.4)',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: '.7rem',
-                  color: accent,
-                  textTransform: 'uppercase',
-                  letterSpacing: '.15em',
-                  marginBottom: '12px',
-                  fontWeight: 600,
-                }}
-              >
-                {cat.title}
-              </div>
-              <div style={{ fontSize: '.9rem', color: 'var(--cold)', lineHeight: '1.8', fontFamily: 'DM Mono, monospace' }}>
-                {cat.items.map((item) => (
-                  <div key={item}>{item}</div>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div className="reveal-up" style={{ marginTop: 'var(--space-12)' }}>
+          <LogoLoop items={items} accent={accent} />
+          <div style={{ marginTop: 'var(--space-6)' }}>
+            <LogoLoop items={[...items].reverse()} accent={accent} reverse={true} />
+          </div>
         </div>
       </div>
     </section>

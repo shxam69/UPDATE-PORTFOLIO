@@ -1,0 +1,76 @@
+.career-notch-container {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none; /* Let clicks pass through the container */
+}
+
+.career-notch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(5, 7, 10, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+  pointer-events: auto; /* Enable clicks on the notch */
+  transition: all 0.3s ease;
+}
+
+.notch-btn {
+  padding: 8px 24px;
+  border-radius: 30px;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--cold2);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.notch-btn.active {
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--amber);
+  box-shadow: 0 0 15px rgba(245, 166, 35, 0.3);
+}
+
+.notch-btn.ml-active {
+  background: var(--cyan);
+  box-shadow: 0 0 15px rgba(0, 230, 230, 0.3);
+}
+
+.notch-text-desktop {
+  display: inline;
+}
+
+.notch-text-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .career-notch-container {
+    top: 12px;
+  }
+  
+  .notch-btn {
+    padding: 6px 16px;
+    font-size: 0.65rem;
+  }
+  
+  .notch-text-desktop {
+    display: none;
+  }
+  
+  .notch-text-mobile {
+    display: inline;
+  }
+}

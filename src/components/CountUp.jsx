@@ -26,7 +26,7 @@ export default function CountUp({ value, duration = 1.5, suffix = '%', prefix = 
       scrollTrigger: {
         trigger: el,
         start: 'top 95%', // Trigger count up when element is near bottom
-        toggleActions: 'play none none none',
+        toggleActions: 'play none none reset',
       },
       onUpdate: () => {
         // Handle integers vs floats (default to integer floor)

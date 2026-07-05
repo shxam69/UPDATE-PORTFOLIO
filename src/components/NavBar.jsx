@@ -13,6 +13,10 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import gsap from 'gsap';
+import { useStore } from '../store';
+import { TRACK_CONTENT } from '../data/trackContent';
+import StarBorder from './StarBorder';
 
 // ─── Navigation items ────────────────────────────────────────────────────────
 const NAV_LINKS = [
@@ -24,11 +28,14 @@ const NAV_LINKS = [
   { label: 'Contact',        href: '#contact',        sectionId: 'contact'        },
 ];
 
-// ─── Resume PDF path ─────────────────────────────────────────────────────────
-// Place your PDF at: /public/resume.pdf
-// It will be served at the root URL automatically by Vite.
-const RESUME_PDF_PATH = '/resume.pdf';
-const RESUME_FILENAME = 'ShyamA_Resume.pdf';
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+
+// Fallback resume (used only if track data is ever missing)
+const FALLBACK_RESUME_PDF_PATH = '/resume.pdf';
+const FALLBACK_RESUME_FILENAME = 'ShyamA_Resume.pdf';
 
 // ─── NavBar component ────────────────────────────────────────────────────────
 export default function NavBar() {
@@ -37,10 +44,48 @@ export default function NavBar() {
   const [activeSection, setActiveSection] = useState('hero');
   const [mobileOpen,   setMobileOpen]   = useState(false);
 
+  const activeTrack   = useStore((state) => state.activeTrack);
+  const setActiveTrack = useStore((state) => state.setActiveTrack);
+  const track = TRACK_CONTENT[activeTrack] || TRACK_CONTENT.software;
+
   const lastScrollY  = useRef(0);
   const ticking      = useRef(false);
   const navRef        = useRef(null);
   const mobileMenuRef = useRef(null);
+
+  // ── Career Mode switch: single entry point for the whole transition ──────
+  // Fade current content -> smooth-scroll to top (Lenis) -> swap track
+  // (refreshes Projects/Skills/Hero identity/resume reactively) -> fade
+  // back in. Hero's entrance animation replays itself via `heroReplayKey`
+  // (bumped inside setActiveTrack) — no DOM coupling needed here.
+  const handleTrackSwitch = useCallback((nextTrack) => {
+    if (nextTrack === activeTrack) return;
+    setMobileOpen(false);
+
+    const lenis = window.__lenis;
+    if (lenis) {
+      lenis.scrollTo(0, { duration: 0.7 });
+    } else if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const content = document.getElementById('main-content');
+
+    if (!content || prefersReducedMotion()) {
+      setActiveTrack(nextTrack);
+      return;
+    }
+
+    gsap.to(content, {
+      opacity: 0,
+      duration: 0.25,
+      ease: 'power2.in',
+      onComplete: () => {
+        setActiveTrack(nextTrack);
+        gsap.fromTo(content, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+      },
+    });
+  }, [activeTrack, setActiveTrack]);
 
   // ── Scroll-hide / scroll-show + glass intensity ──────────────────────────
   const handleScroll = useCallback(() => {
@@ -197,20 +242,22 @@ export default function NavBar() {
           </ul>
         </nav>
 
-        {/* Right cluster: status + resume */}
+        {/* Right cluster: career mode + status + resume */}
         <div className="navbar__right">
+          {/* Career Mode toggle removed and moved to CareerNotch */}
+
           {/* Available indicator */}
           <div className="navbar__status" aria-label="Availability status: Available">
             <span className="pulse-dot" aria-hidden="true" />
             Available
           </div>
 
-          {/* Resume CTA */}
+          {/* Resume CTA — swaps with Career Mode */}
           <a
-            href={RESUME_PDF_PATH}
-            download={RESUME_FILENAME}
+            href={track.resumeHref || FALLBACK_RESUME_PDF_PATH}
+            download={track.resumeFilename || FALLBACK_RESUME_FILENAME}
             className="navbar__resume magnetic"
-            aria-label="Download resume PDF"
+            aria-label={`Download ${track.shortLabel} resume PDF`}
           >
             <span className="navbar__resume-icon" aria-hidden="true">
               {/* Inline SVG arrow-down icon — no external dependency */}
@@ -277,12 +324,14 @@ export default function NavBar() {
 
         {/* Resume CTA inside drawer */}
         <div className="mobile-menu__footer">
+          {/* Career Mode toggle removed and moved to CareerNotch */}
+
           <a
-            href={RESUME_PDF_PATH}
-            download={RESUME_FILENAME}
+            href={track.resumeHref || FALLBACK_RESUME_PDF_PATH}
+            download={track.resumeFilename || FALLBACK_RESUME_FILENAME}
             className="navbar__resume navbar__resume--full magnetic"
             tabIndex={mobileOpen ? 0 : -1}
-            aria-label="Download resume PDF"
+            aria-label={`Download ${track.shortLabel} resume PDF`}
           >
             <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M6 1v7M3 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

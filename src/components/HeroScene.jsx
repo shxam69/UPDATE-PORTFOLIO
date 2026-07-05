@@ -1,145 +1,75 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useStore } from '../store';
+import { TRACK_CONTENT } from '../data/trackContent';
+import StarBorder from './StarBorder';
+import { useSpotlight } from '../hooks/useSpotlight';
+import Saturn from './Saturn';
 
 /**
- * HERO SCENE — Premium entrance with parallax text + Career Mode
+ * HERO SCENE — Premium entrance with parallax text + Career Mode identity
+ *
+ * The Career Mode selector itself now lives in NavBar (single source of
+ * truth, persistent across every section). This component only reacts to
+ * `activeTrack` — it never mutates it.
  *
  * Features:
- * - Staggered character animation
+ * - Staggered character animation, replayed on every Career Mode switch
+ *   (via `heroReplayKey`), not just on first mount
  * - Parallax depth layers
- * - "Choose Your Path" career-mode selector, wired to the global
- *   activeTrack store (also drives ProjectsScene / SkillsScene)
- * - Two-column responsive layout
+ * - Dynamic identity card that crossfades between SWE / MLE content
  */
-
-const TRACK_CONTENT = {
-  software: {
-    accent: 'var(--amber)',
-    accentGlow: 'var(--amber-glow)',
-    accentRgb: '245, 166, 35',
-    eyebrow: 'Software Engineering — Scalable Infrastructure',
-    heading: 'Systems & Architecture',
-    bullets: [
-      { label: 'Core', text: 'Distributed microservices, backend pipelines, web platforms' },
-      { label: 'Resilience', text: 'JWT-secured, parameter-locked government portal (CMRL)' },
-    ],
-    stats: [
-      { value: '3+', label: 'Internships' },
-      { value: '35%', label: 'Latency reduction' },
-    ],
-    resumeHref: '/ShyamA_SWE_Resume.pdf',
-    resumeFilename: 'ShyamA_SWE_Resume.pdf',
-    resumeLabel: 'Download SWE Resume',
-    btnClass: 'btn-amber',
-  },
-  ml: {
-    accent: 'var(--cyan)',
-    accentGlow: 'var(--cyan-glow)',
-    accentRgb: '41, 182, 246',
-    eyebrow: 'Machine Learning — Explainable Intelligence',
-    heading: 'Intelligence & Models',
-    bullets: [
-      { label: 'Design', text: 'Probabilistic prototype-based networks, explainable AI (XAI)' },
-      { label: 'Engineering', text: 'Custom preprocessing filters, PyTorch CNNs, SHAP explainability' },
-    ],
-    stats: [
-      { value: '8.5', label: 'CGPA' },
-      { value: '5+', label: 'ML/Systems credentials' },
-    ],
-    resumeHref: '/ShyamA_MLE_Resume.pdf',
-    resumeFilename: 'ShyamA_MLE_Resume.pdf',
-    resumeLabel: 'Download MLE Resume',
-    btnClass: 'btn-cyan',
-  },
-};
-
 export default function HeroScene() {
   const heroRef = useRef(null);
   const containerRef = useRef(null);
   const cardRef = useRef(null);
   const activeTrack = useStore((state) => state.activeTrack);
-  const setActiveTrack = useStore((state) => state.setActiveTrack);
+  const heroReplayKey = useStore((state) => state.heroReplayKey);
+  const { onMouseMove: cardSpotlight, onMouseLeave: cardSpotlightLeave } = useSpotlight(cardRef);
 
+
+  // Entrance timeline — runs on mount AND replays on every Career Mode
+  // switch (heroReplayKey changes), per the "replay Hero entrance
+  // animation" requirement.
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
+      // Reset to the pre-animation state first so the replay is a real
+      // replay, not a no-op (elements are already at rest after the
+      // first run).
+      gsap.set(containerRef.current, { scale: 0.96, opacity: 0 });
+      gsap.set('.hero-char', { y: 60, opacity: 0 });
+      gsap.set('.hero-fade', { y: 20, opacity: 0 });
+      gsap.set('.hero-cta', { y: 20, opacity: 0 });
+
+      const tl = gsap.timeline({ 
         defaults: { ease: 'power3.out' },
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse',
+        }
       });
 
-      // ─────────────────────────────────────────────────────────────────
-      // Character stagger animation (primary heading)
-      // ─────────────────────────────────────────────────────────────────
-      tl.to(
-        '.hero-char',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.06,
-          ease: 'back.out(2)',
-        },
-        0.3
-      );
+      tl.to(containerRef.current, { scale: 1, opacity: 1, duration: 1.2, ease: 'power2.out' }, 0)
+        .to('.hero-char', { y: 0, opacity: 1, duration: 0.8, stagger: 0.06, ease: 'back.out(2)' }, 0.15)
+        .to('.hero-fade', { y: 0, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power2.out' }, 0.35)
+        .to('.hero-cta', { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power2.out' }, 0.85);
 
-      // ─────────────────────────────────────────────────────────────────
-      // Secondary text reveal (fade + slide)
-      // ─────────────────────────────────────────────────────────────────
-      tl.to(
-        '.hero-fade',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.08,
-          ease: 'power2.out',
-        },
-        0.5
-      );
-
-      // ─────────────────────────────────────────────────────────────────
-      // CTA buttons reveal
-      // ─────────────────────────────────────────────────────────────────
-      tl.to(
-        '.hero-cta',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: 'power2.out',
-        },
-        1
-      );
-
-      // ─────────────────────────────────────────────────────────────────
       // Continuous floating accent
-      // ─────────────────────────────────────────────────────────────────
-      gsap.to('.hero-accent', {
-        y: -20,
-        duration: 4,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-      });
+      gsap.to('.hero-accent', { y: -20, duration: 4, ease: 'sine.inOut', repeat: -1, yoyo: true });
     }, heroRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [heroReplayKey]);
 
   // Crossfade the identity card whenever the career mode changes
   useEffect(() => {
     if (!cardRef.current) return;
-    gsap.fromTo(
-      cardRef.current,
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }
-    );
+    gsap.fromTo(cardRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
   }, [activeTrack]);
 
   const name = 'SHYAM A';
-  const subtitle =
-    'I architect robust distributed platforms and explainable machine learning systems — from secure metro-rail infrastructure to prototype-based neural networks built for real-world stability.';
 
   const track = TRACK_CONTENT[activeTrack] || TRACK_CONTENT.software;
 
@@ -149,8 +79,9 @@ export default function HeroScene() {
       className="scene"
       ref={heroRef}
       style={{
-        paddingTop: '120px',
-        minHeight: '100vh',
+        paddingTop: '96px',
+        paddingBottom: '64px',
+        minHeight: 'auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -166,47 +97,55 @@ export default function HeroScene() {
             width: '100%',
             display: 'grid',
             gridTemplateColumns: '1fr',
-            gap: 'var(--space-6)',
+            gap: 'var(--space-4)',
           }}
         >
-          {/* ─────────────────────────────────────────────────────────
-              HERO LABEL (badge)
-              ───────────────────────────────────────────────────────── */}
+          {/* HERO LABEL (availability badge) */}
           <div
             className="hero-fade"
             style={{
               fontFamily: 'DM Mono, monospace',
-              fontSize: 'var(--text-xs)',
-              letterSpacing: '0.2em',
-              color: 'var(--amber)',
+              fontSize: '0.72rem',
+              letterSpacing: '0.1em',
+              color: 'var(--white)',
               textTransform: 'uppercase',
-              marginBottom: 'var(--space-2)',
               opacity: 0,
               transform: 'translateY(20px)',
               fontWeight: 600,
-              display: 'inline-block',
-              padding: 'var(--space-2) var(--space-4)',
-              borderRadius: 'var(--radius-md)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 16px',
+              borderRadius: '999px',
               width: 'fit-content',
-              border: '1px solid var(--glass-border)',
-              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             }}
           >
-            Portfolio — Systems &amp; Machine Learning
+            <span
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#00e676',
+                boxShadow: '0 0 10px #00e676, 0 0 20px #00e676',
+                animation: 'pulse-glow 2s infinite',
+              }}
+            />
+            Available for Full-Time Software &amp; AI Roles
           </div>
 
-          {/* ─────────────────────────────────────────────────────────
-              HERO NAME (primary heading)
-              ───────────────────────────────────────────────────────── */}
+          {/* HERO NAME (primary heading) */}
           <h1
             style={{
               fontSize: 'clamp(4rem, 15vw, 10rem)',
-              marginBottom: 'var(--space-2)',
               display: 'flex',
               flexWrap: 'wrap',
               gap: '0.1em',
-              textShadow:
-                '0 0 40px rgba(245, 166, 35, 0.15), 0 0 80px rgba(245, 166, 35, 0.05)',
+              textShadow: '0 0 40px rgba(245, 166, 35, 0.15), 0 0 80px rgba(245, 166, 35, 0.05)',
               lineHeight: 0.9,
               fontWeight: 700,
               letterSpacing: '-0.03em',
@@ -216,21 +155,14 @@ export default function HeroScene() {
               <span
                 key={i}
                 className="hero-char"
-                style={{
-                  opacity: 0,
-                  transform: 'translateY(60px)',
-                  display: 'inline-block',
-                  fontSize: 'inherit',
-                }}
+                style={{ opacity: 0, transform: 'translateY(60px)', display: 'inline-block', fontSize: 'inherit' }}
               >
                 {char === ' ' ? '\u00A0' : char}
               </span>
             ))}
           </h1>
 
-          {/* ─────────────────────────────────────────────────────────
-              HERO TAGLINE (subheading)
-              ───────────────────────────────────────────────────────── */}
+          {/* HERO TAGLINE */}
           <h2
             className="hero-fade"
             style={{
@@ -240,7 +172,6 @@ export default function HeroScene() {
               fontWeight: 600,
               fontFamily: 'Bebas Neue, sans-serif',
               maxWidth: '950px',
-              marginBottom: 'var(--space-4)',
               opacity: 0,
               transform: 'translateY(20px)',
               letterSpacing: '0.05em',
@@ -255,118 +186,15 @@ export default function HeroScene() {
             <span style={{ color: 'var(--cyan)', textShadow: '0 0 15px var(--cyan-glow)' }}>Machine Learning Engineer</span>
           </h2>
 
-          {/* ─────────────────────────────────────────────────────────
-              HERO DESCRIPTION
-              ───────────────────────────────────────────────────────── */}
-          <p
-            className="hero-fade"
-            style={{
-              fontSize: 'clamp(0.9rem, 2.2vw, 1.05rem)',
-              lineHeight: 1.7,
-              color: 'var(--cold2)',
-              maxWidth: '850px',
-              marginBottom: 'var(--space-6)',
-              opacity: 0,
-              transform: 'translateY(20px)',
-              letterSpacing: '0.01em',
-            }}
-          >
-            {subtitle}
-          </p>
 
-          {/* ─────────────────────────────────────────────────────────
-              CAREER MODE — "Choose Your Path"
-              ───────────────────────────────────────────────────────── */}
-          <div
-            className="hero-fade"
-            style={{
-              opacity: 0,
-              transform: 'translateY(20px)',
-              marginBottom: 'var(--space-6)',
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'DM Mono, monospace',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--cold2)',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                marginBottom: 'var(--space-3)',
-              }}
-            >
-              Choose Your Path
-            </div>
 
-            <div
-              style={{
-                display: 'inline-flex',
-                padding: '6px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--glass-border)',
-                background: 'rgba(5, 7, 10, 0.6)',
-                backdropFilter: 'blur(15px)',
-                gap: '8px',
-              }}
-            >
-              <button
-                onClick={() => setActiveTrack('software')}
-                className="magnetic"
-                style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: '0.78rem',
-                  letterSpacing: '0.04em',
-                  padding: '12px 24px',
-                  border: 'none',
-                  background: activeTrack === 'software' ? 'var(--amber)' : 'transparent',
-                  color: activeTrack === 'software' ? 'var(--ink)' : 'var(--cold2)',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                  fontWeight: 700,
-                  boxShadow: activeTrack === 'software' ? '0 0 20px var(--amber-glow)' : 'none',
-                }}
-              >
-                Software Engineer
-              </button>
-              <button
-                onClick={() => setActiveTrack('ml')}
-                className="magnetic"
-                style={{
-                  fontFamily: 'DM Mono, monospace',
-                  fontSize: '0.78rem',
-                  letterSpacing: '0.04em',
-                  padding: '12px 24px',
-                  border: 'none',
-                  background: activeTrack === 'ml' ? 'var(--cyan)' : 'transparent',
-                  color: activeTrack === 'ml' ? 'var(--ink)' : 'var(--cold2)',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                  fontWeight: 700,
-                  boxShadow: activeTrack === 'ml' ? '0 0 20px var(--cyan-glow)' : 'none',
-                }}
-              >
-                Machine Learning Engineer
-              </button>
-            </div>
-          </div>
-
-          {/* ─────────────────────────────────────────────────────────
-              DYNAMIC IDENTITY CARD — swaps with Career Mode
-              ───────────────────────────────────────────────────────── */}
-          <div
-            className="hero-fade"
-            style={{
-              opacity: 0,
-              transform: 'translateY(20px)',
-              marginBottom: 'var(--space-6)',
-              maxWidth: '620px',
-            }}
-          >
+          {/* DYNAMIC IDENTITY CARD — swaps with Career Mode (selector lives in NavBar) */}
+          <div className="hero-fade" style={{ opacity: 0, transform: 'translateY(20px)', maxWidth: '620px' }}>
             <div
               ref={cardRef}
-              className="glass-panel"
+              className="glass-card-premium"
+              onMouseMove={cardSpotlight}
+              onMouseLeave={cardSpotlightLeave}
               style={{
                 padding: 'var(--space-6)',
                 borderRadius: 'var(--radius-md)',
@@ -400,82 +228,63 @@ export default function HeroScene() {
                   ))}
                 </div>
               </div>
-              <a
+              <StarBorder
+                as="a"
                 href={track.resumeHref}
                 download={track.resumeFilename}
+                color={track.accent}
+                speed="6s"
                 className={`${track.btnClass} magnetic`}
-                style={{
-                  width: '100%',
-                  textAlign: 'center',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  padding: '12px 24px',
-                }}
+                style={{ alignSelf: 'flex-start' }}
               >
                 {track.resumeLabel}
-              </a>
+              </StarBorder>
             </div>
           </div>
 
-          {/* ─────────────────────────────────────────────────────────
-              SECONDARY ACTIONS
-              ───────────────────────────────────────────────────────── */}
-          <div
-            style={{
-              display: 'flex',
-              gap: 'var(--space-4)',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
-            <a
+          {/* SECONDARY ACTIONS */}
+          <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
+            <StarBorder
+              as="a"
               href="#projects"
+              color="var(--amber)"
+              speed="8s"
               className="btn-outline magnetic hero-cta"
-              style={{
-                opacity: 0,
-                transform: 'translateY(20px)',
-                borderColor: 'rgba(245, 166, 35, 0.3)',
-                color: 'var(--amber)',
-              }}
+              style={{ opacity: 0, transform: 'translateY(20px)', borderColor: 'rgba(245, 166, 35, 0.3)', color: 'var(--amber)' }}
             >
               View Projects
-            </a>
-            <a
+            </StarBorder>
+            <StarBorder
+              as="a"
               href="#contact"
+              color="var(--cyan)"
+              speed="8s"
               className="btn-outline magnetic hero-cta"
-              style={{
-                opacity: 0,
-                transform: 'translateY(20px)',
-                borderColor: 'rgba(41, 182, 246, 0.3)',
-                color: 'var(--cyan)',
-              }}
+              style={{ opacity: 0, transform: 'translateY(20px)', borderColor: 'rgba(41, 182, 246, 0.3)', color: 'var(--cyan)' }}
             >
               Contact Me
-            </a>
+            </StarBorder>
           </div>
         </div>
 
-        {/* ─────────────────────────────────────────────────────────
-            HERO ACCENT (floating element)
-            ───────────────────────────────────────────────────────── */}
+        {/* HERO ACCENT (SATURN) */}
         <div
           className="hero-accent"
           style={{
             position: 'absolute',
-            bottom: '10%',
-            right: '5%',
-            width: '200px',
-            height: '200px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 30% 30%, rgba(245, 166, 35, 0.15), transparent)',
-            blur: '40px',
+            top: '50%',
+            right: '-8%',
+            transform: 'translateY(-50%)',
+            width: '30vw',
+            height: '600px',
+            minWidth: '350px',
             pointerEvents: 'none',
-            display: 'none',
-            '@media (min-width: 1024px)': {
-              display: 'block',
-            },
+            zIndex: 0,
+            opacity: 0.9,
           }}
-        />
+        >
+          <Saturn />
+        </div>
       </div>
     </section>
   );

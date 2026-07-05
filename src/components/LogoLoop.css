@@ -1,0 +1,85 @@
+.logo-loop-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  display: flex;
+  /* Fade edges */
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+.logo-loop-track {
+  display: flex;
+  gap: 16px;
+  padding: 8px 0;
+  width: max-content;
+  animation: logo-loop-scroll 40s linear infinite;
+}
+
+.logo-loop-track:hover {
+  animation-play-state: paused;
+}
+
+.logo-loop-track.reverse {
+  animation-direction: reverse;
+}
+
+.logo-loop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  color: var(--cold2);
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.35s ease,
+              color 0.35s ease,
+              box-shadow 0.35s ease;
+  cursor: default;
+}
+
+.logo-loop-item:hover {
+  transform: translateY(-6px) scale(1.04);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--white);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.04);
+}
+
+.logo-loop-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.logo-loop-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.logo-loop-label {
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+@keyframes logo-loop-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333333%); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-loop-track {
+    animation: none;
+  }
+}

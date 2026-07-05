@@ -22,17 +22,17 @@ function NebulaSphere() {
   const uniforms = useMemo(() => ({
     uTime: { value: 0 },
     uScroll: { value: 0 },
-    uColor1: { value: new THREE.Color(0x020202) },
-    uColor2: { value: new THREE.Color(0x4a5059) },
-    uColor3: { value: new THREE.Color(0x080a0c) },
-    uIntensity: { value: 0.65 },
+    uColor1: { value: new THREE.Color(0x0a0d1a) },
+    uColor2: { value: new THREE.Color(0x1a0a05) },
+    uColor3: { value: new THREE.Color(0x2a1a0a) },
+    uIntensity: { value: 1.0 },
   }), []);
 
   // Move color allocations outside useFrame to eliminate heap GC overhead
   const colorsRef = useRef({
-    color1: new THREE.Color(0x020202),
-    color2: new THREE.Color(0x4a5059),
-    color3: new THREE.Color(0x080a0c),
+    color1: new THREE.Color(0x020305),
+    color2: new THREE.Color(0xb58038),
+    color3: new THREE.Color(0x0a1c28),
   });
 
   useFrame((state) => {
@@ -47,9 +47,9 @@ function NebulaSphere() {
 
     // ─ Static premium colors (Base: deep black, Primary: warm amber, Secondary: electric blue) ─
     const { color1, color2, color3 } = colorsRef.current;
-    color1.setHex(0x020202);
-    color2.setHex(0x4a5059);
-    color3.setHex(0x080a0c);
+    color1.setHex(0x020305);
+    color2.setHex(0xb58038);
+    color3.setHex(0x0a1c28);
 
     // ─ Stable intensity — a single fixed atmosphere across every section.
     //   Previously this switched on `currentScene?.id`, so brightness would
@@ -57,7 +57,7 @@ function NebulaSphere() {
     //   "flashing" / "sections losing atmospheric depth"). A tiny, slow
     //   sine drift keeps it feeling alive without ever being perceptible
     //   as a flash or a section-dependent change. ─
-    const intensity = 0.5; // stable, no oscillation
+    const intensity = 0.65 + Math.sin(time * 0.05) * 0.03;
 
     meshRef.current.material.uniforms.uColor1.value = color1;
     meshRef.current.material.uniforms.uColor2.value = color2;
@@ -200,33 +200,25 @@ const nebulaFragmentShader = `
   void main() {
     vec2 uv = vUv;
     
-    // ─ Layered noise fields (used to place dust, not to fill color) ─
+    // ─ Layered nebula with depth ─
     float n1 = fbm(uv * 3.0 + vec2(uTime * 0.0025, uTime * 0.001));
     float n2 = fbm(uv * 5.0 + vec2(-uTime * 0.002, -uTime * 0.0035) + n1 * 2.0);
     float n3 = fbm(uv * 8.0 + uScroll * 2.0 + n2 * 1.5);
-
-    // ─ Base is always deep black. Colors are never area-filled via mix() —
-    //   that previously put amber across roughly half the screen (fbm
-    //   noise averages ~0.5), reading as a dark brown/reddish wash over
-    //   the whole viewport instead of "very subtle amber dust". ─
-    vec3 col = uColor1;
-
-    // ─ Sparse amber dust: pow() compresses the noise so only the bright
-    //   peaks contribute, keeping the vast majority of the frame pure black ─
-    float dust = pow(max(n1 - 0.55, 0.0) * 2.2, 3.0) * 0.4;
-    dust += pow(max(n3 - 0.62, 0.0) * 2.6, 4.0) * 0.22;
-    col += uColor2 * dust * uIntensity;
-
-    // ─ Barely-there depth accent — negligible, keeps things feeling black ─
-    float depthTint = pow(max(n2 - 0.68, 0.0) * 3.0, 5.0) * 0.06;
-    col += uColor3 * depthTint;
     
-    // ─ Gentle vignette for cinematic depth (darkens edges slightly, no hue shift) ─
-    float vignette = 1.0 - distance(uv, vec2(0.5)) * 0.6;
-    col *= mix(0.85, 1.0, vignette);
+    // ─ Color composition based on noise layers ─
+    vec3 col = mix(uColor1, uColor2, n1);
+    col = mix(col, uColor3, n2 * 0.6);
+    
+    // ─ Add light bursts and depth ─
+    col += uColor2 * (n2 * 0.3 + n3 * 0.2);
+    col *= uIntensity;
+    
+    // ─ Vignette for cinematic depth ─
+    float vignette = 1.0 - distance(uv, vec2(0.5)) * 0.8;
+    col *= mix(0.6, 1.0, vignette);
 
     // ─ Defensive clamp: guarantees output can never exceed the intended
-    //   near-black palette range, regardless of uniform drift ─
+    //   amber/black/teal palette range, regardless of uniform drift ─
     col = clamp(col, 0.0, 1.0);
 
     gl_FragColor = vec4(col, 1.0);
@@ -272,11 +264,11 @@ const nebulaFragmentShaderLow = `
   void main() {
     vec2 uv = vUv;
     float n = fbm(uv * 4.0 + vec2(uTime * 0.003, uScroll * 0.5));
-    vec3 col = uColor1;
-    float dust = pow(max(n - 0.58, 0.0) * 2.4, 3.0) * 0.4;
-    col += uColor2 * dust * uIntensity;
-    float vignette = 1.0 - distance(uv, vec2(0.5)) * 0.5;
-    col *= mix(0.85, 1.0, vignette);
+    vec3 col = mix(uColor1, uColor2, n);
+    col = mix(col, uColor3, n * 0.3);
+    col *= uIntensity;
+    float vignette = 1.0 - distance(uv, vec2(0.5)) * 0.7;
+    col *= mix(0.7, 1.0, vignette);
     col = clamp(col, 0.0, 1.0);
     gl_FragColor = vec4(col, 1.0);
   }
@@ -306,16 +298,18 @@ function LightingController() {
     // atmosphere color — kept intentionally simple for any future lit
     // geometry, without the per-frame branching/oscillation cost.
     // ─────────────────────────────────────────────────────────────────────
-    dirLightRef.current.intensity = 0.25;
+    const dirIntensity = 0.35 + Math.sin(time * 0.15) * 0.05;
+
+    dirLightRef.current.intensity = dirIntensity;
     dirLightRef.current.position.x = 15 * Math.sin(time * 0.03);
     dirLightRef.current.position.y = 10 + 4 * Math.cos(time * 0.025);
     dirLightRef.current.position.z = 5 + 5 * Math.cos(time * 0.02);
-    dirLightRef.current.color.setHex(0xcccccc); // neutral silver light
+    dirLightRef.current.color.setHex(0xb58038);
 
     // ─ Ambient light: stable fill ─
     if (ambientLightRef.current) {
       ambientLightRef.current.intensity = 0.12;
-      ambientLightRef.current.color.setHex(0xffffff);
+      ambientLightRef.current.color.setHex(0xe0e6ed);
     }
 
     // ─ Point light: adds depth, slow drift only ─
@@ -339,7 +333,7 @@ function LightingController() {
         ref={dirLightRef}
         position={[10, 10, 5]}
         intensity={0.2}
-        color="#cccccc"
+        color="#b58038"
         castShadow={enableShadows}
         shadow-mapSize-width={enableShadows ? 512 : 0}
         shadow-mapSize-height={enableShadows ? 512 : 0}
@@ -367,19 +361,21 @@ export default function AstroEnvironment() {
   
   const sparklesConfig = useMemo(() => {
     if (device.isMobile || device.isLowEnd) {
+      // Mobile: max 30 sparkles total (combined with 100 stars = high performance)
       return [
-        { count: 30, scale: 20, size: 1.0, speed: 0.05, opacity: 0.08, color: "#ffffff" }
+        { count: 30, scale: 20, size: 1.0, speed: 0.05, opacity: 0.08, color: "#b58038" }
       ];
     }
     if (device.isTablet) {
+      // Tablet: reduced particles
       return [
-        { count: 100, scale: 20, size: 1.2, speed: 0.08, opacity: 0.1, color: "#ffffff" },
+        { count: 100, scale: 20, size: 1.2, speed: 0.08, opacity: 0.1, color: "#b58038" },
         { count: 50, scale: 30, size: 2.0, speed: 0.05, opacity: 0.08, color: "#a1a1aa" }
       ];
     }
     // Desktop: full atmosphere
     return [
-      { count: 200, scale: 20, size: 1.5, speed: 0.12, opacity: 0.15, color: "#ffffff" },
+      { count: 200, scale: 20, size: 1.5, speed: 0.12, opacity: 0.15, color: "#b58038" },
       { count: 100, scale: 30, size: 2.5, speed: 0.06, opacity: 0.1, color: "#a1a1aa" }
     ];
   }, [device]);

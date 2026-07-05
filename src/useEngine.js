@@ -43,46 +43,38 @@ export function useEngine() {
     });
 
     // ─────────────────────────────────────────────────────────────────────
-    // 3. Connect GSAP Ticker to Lenis for smooth RAF integration
+    // 3. Single global animation loop, driven by GSAP's own ticker (rAF)
+    //    Previously this also ran a second, independent requestAnimationFrame
+    //    loop purely to track elapsed time / FPS — two competing rAF loops
+    //    updating the same store on slightly different clocks. Consolidated
+    //    into one tick so there is exactly one render-driving loop.
     // ─────────────────────────────────────────────────────────────────────
-    const updateGSAP = (time) => {
-      lenis.raf(time * 1000);
-    };
-    
-    gsap.ticker.add(updateGSAP);
-    gsap.ticker.lagSmoothing(0);
-
-    // ─────────────────────────────────────────────────────────────────────
-    // 4. Global Animation Loop
-    // ─────────────────────────────────────────────────────────────────────
-    let animationFrameId;
-    let startTime = performance.now();
     let frameCount = 0;
     let lastFpsTime = performance.now();
 
-    const loop = (currentTime) => {
-      const elapsed = (currentTime - startTime) * 0.001; // Convert to seconds
-      setTime(elapsed);
+    const tick = (time) => {
+      // `time` is seconds elapsed since the ticker started (gsap.ticker default)
+      lenis.raf(time * 1000);
+      setTime(time);
 
       // ─ Performance monitoring (calculate FPS every 500ms) ─
+      const now = performance.now();
       frameCount++;
-      const timeSinceLastCheck = currentTime - lastFpsTime;
+      const timeSinceLastCheck = now - lastFpsTime;
       if (timeSinceLastCheck >= 500) {
         const fps = Math.round((frameCount * 1000) / timeSinceLastCheck);
         setFps(fps);
         frameCount = 0;
-        lastFpsTime = currentTime;
+        lastFpsTime = now;
 
-        // Log performance warning if FPS is low
         if (fps < 30 && fps > 0) {
           console.warn(`⚠ Low FPS detected: ${fps}fps. Consider reducing particles or enabling mobile optimizations.`);
         }
       }
-
-      animationFrameId = requestAnimationFrame(loop);
     };
 
-    loop(performance.now());
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
 
     // ─────────────────────────────────────────────────────────────────────
     // 5. Mouse Tracking (normalized to -1 to 1 range for WebGL)
@@ -111,8 +103,7 @@ export function useEngine() {
     // ─────────────────────────────────────────────────────────────────────
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(updateGSAP);
-      cancelAnimationFrame(animationFrameId);
+      gsap.ticker.remove(tick);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
