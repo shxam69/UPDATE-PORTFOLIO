@@ -82,8 +82,7 @@ export default function ContactScene() {
       ref={sectionRef}
       style={{
         paddingBottom: 'var(--space-16)',
-        position: 'relative',
-        overflow: 'hidden',
+        position: 'relative'
       }}
     >
       <div
@@ -115,28 +114,29 @@ export default function ContactScene() {
             CONTACT ME
           </div>
 
-          {/* Title with FallingText effect */}
+
           <div style={{
             fontFamily: 'Bebas Neue',
-            fontSize: 'clamp(3rem, 12vw, 6.5rem)',
+            fontSize: 'clamp(2rem, 8vw, 5rem)',
+            marginTop: '40px',
             marginBottom: 'var(--space-8)',
-            lineHeight: 0.95,
+            lineHeight: 1,
             fontWeight: 700,
-            letterSpacing: '-0.02em',
-            textShadow: '0 0 30px rgba(255, 51, 68, 0.2)',
+            letterSpacing: '0.02em',
             height: '150px',
-            position: 'relative'
+            position: 'relative',
+            color: '#F8F8F8',
+            zIndex: 10,
+            padding: 0
           }}>
             <FallingText
               text="GET IN TOUCH"
-              highlightWords={["IN", "TOUCH"]}
-              highlightClass="contact-highlight"
               trigger="scroll"
               backgroundColor="transparent"
               wireframes={false}
-              gravity={0.56}
+              gravity={0.55}
               fontSize="inherit"
-              mouseConstraintStiffness={0.9}
+              mouseConstraintStiffness={0.85}
             />
           </div>
         </div>
