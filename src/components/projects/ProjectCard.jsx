@@ -4,8 +4,9 @@ import ProjectVisual from './ProjectVisual';
 import LinkButton from './LinkButton';
 import '../PremiumGlass.css';
 import { playUISound } from '../../hooks/useAudio';
+import { trackEvent } from '../../utils/analytics';
 
-export default function ProjectCard({ project, onOpen }) {
+export default function ProjectCard({ project, onOpen, index }) {
   const { title, org, description, color, techStack, metrics, links, thumbnail } = project;
   const cardRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -60,23 +61,25 @@ export default function ProjectCard({ project, onOpen }) {
 
   const handleOpen = useCallback(() => {
     playUISound('folder');
+    trackEvent('Project Opened', { project: title });
     onOpen();
-  }, [onOpen]);
+  }, [onOpen, title]);
 
   return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleOpen}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-label={`Open case study for ${title}`}
-      className="glass-card-premium glass-card-tilt explore-hover"
-      style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-    >
+    <div data-reveal={index % 2 === 0 ? "left" : "right"} style={{ height: '100%', display: 'flex' }}>
+      <div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleOpen}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={`Open case study for ${title}`}
+        className="glass-card-premium glass-card-tilt explore-hover"
+        style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer', flex: 1 }}
+      >
       {/* Thumbnail */}
       <div style={{ position: 'relative', height: '190px', flexShrink: 0, overflow: 'hidden', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}>
         <ProjectVisual imageUrl={thumbnail} color={color} title={title} variant="thumbnail" />
@@ -169,5 +172,6 @@ export default function ProjectCard({ project, onOpen }) {
         </div>
       </div>
     </div>
+  </div>
   );
 }

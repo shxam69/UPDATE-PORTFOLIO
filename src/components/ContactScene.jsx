@@ -5,6 +5,9 @@ import './PremiumGlass.css';
 import { useSpotlight } from '../hooks/useSpotlight';
 import FooterMetaBalls from './FooterMetaBalls';
 import FallingText from './FallingText';
+import { SOCIAL_LINKS } from '../data/socialLinks';
+import { SiLeetcode } from 'react-icons/si';
+import { trackEvent } from '../utils/analytics';
 
 /**
  * CONTACT SCENE v2 — Immersive finale with interactive elements
@@ -22,56 +25,6 @@ export default function ContactScene() {
   const ctaRef = useRef(null);
   const contactCardRef = useRef(null);
   const { onMouseMove: spotlightMove, onMouseLeave: spotlightLeave } = useSpotlight(contactCardRef);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none reset',
-        },
-      });
-
-
-
-      // Description fade in
-      tl.to(
-        '.contact-description',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: 'power2.out',
-        },
-        0.2
-      );
-
-      // CTA buttons stagger
-      tl.to(
-        '.contact-cta-btn',
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power2.out',
-        },
-        0.5
-      );
-
-      // Floating accent animation
-      gsap.to('.contact-accent', {
-        y: -20,
-        duration: 3.5,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
 
   const title = 'GET IN TOUCH';
 
@@ -100,7 +53,7 @@ export default function ContactScene() {
           }}
         >
           <div
-            className="reveal-up"
+            data-reveal="up"
             style={{
               fontFamily: 'DM Mono, monospace',
               fontSize: 'var(--text-xs)',
@@ -150,14 +103,13 @@ export default function ContactScene() {
         >
           {/* Description */}
           <div
-            className="contact-description reveal-up"
+            className="contact-description"
+            data-reveal="up"
             style={{
               fontSize: 'clamp(1rem, 2vw, 1.25rem)',
               color: 'var(--cold2)',
               marginBottom: 'var(--space-12)',
               lineHeight: 1.8,
-              opacity: 0,
-              transform: 'translateY(30px)',
             }}
           >
             <p style={{ marginBottom: 'var(--space-6)' }}>
@@ -202,11 +154,11 @@ export default function ContactScene() {
             }}
           >
             <a
-              href="mailto:shyam666fg@gmail.com"
+              href={SOCIAL_LINKS.EMAIL}
               className="btn-amber magnetic contact-cta-btn"
+              onClick={() => trackEvent('Contact Action Clicked', { type: 'Email' })}
+              data-reveal="up"
               style={{
-                opacity: 0,
-                transform: 'translateY(30px)',
                 fontSize: 'var(--text-xs)',
                 fontWeight: 600,
               }}
@@ -214,38 +166,49 @@ export default function ContactScene() {
               Email Me
             </a>
             <a
-              href="https://www.linkedin.com/in/shxam"
+              href={SOCIAL_LINKS.LINKEDIN}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="btn-outline magnetic contact-cta-btn"
-              style={{
-                opacity: 0,
-                transform: 'translateY(30px)',
-              }}
+              onClick={() => trackEvent('LinkedIn Profile Clicked')}
+              data-reveal="up"
             >
               LinkedIn
             </a>
             <a
-              href="https://github.com/shxam69"
+              href={SOCIAL_LINKS.GITHUB}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="btn-outline magnetic contact-cta-btn"
-              style={{
-                opacity: 0,
-                transform: 'translateY(30px)',
-              }}
+              onClick={() => trackEvent('GitHub Clicked')}
+              data-reveal="up"
             >
               GitHub Profile
             </a>
             <a
-              href="https://wa.me/919543204277"
+              href={SOCIAL_LINKS.LEETCODE}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
+              aria-label="Visit LeetCode Profile"
               className="btn-outline magnetic contact-cta-btn"
+              onClick={() => trackEvent('LeetCode Profile Clicked')}
+              data-reveal="up"
               style={{
-                opacity: 0,
-                transform: 'translateY(30px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
+            >
+              <SiLeetcode size={16} />
+              LeetCode
+            </a>
+            <a
+              href={SOCIAL_LINKS.WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline magnetic contact-cta-btn"
+              onClick={() => trackEvent('Contact Action Clicked', { type: 'WhatsApp' })}
+              data-reveal="up"
             >
               WhatsApp
             </a>
@@ -254,8 +217,8 @@ export default function ContactScene() {
       </div>
 
       {/* Accent elements */}
-      <div className="contact-accent" style={{ position:'absolute', bottom:'20%', left:'10%', width:'250px', height:'250px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(255, 51, 68, 0.1), transparent)', filter:'blur(50px)', pointerEvents:'none' }} />
-      <div className="contact-accent" style={{ position:'absolute', top:'30%', right:'5%', width:'180px', height:'180px', borderRadius:'50%', background:'radial-gradient(circle, rgba(245, 166, 35, 0.08), transparent)', filter:'blur(40px)', pointerEvents:'none', animation:'float 4s ease-in-out infinite', animationDelay:'0.5s' }} />
+      <div className="contact-accent" data-accent-animate="float" style={{ position:'absolute', bottom:'20%', left:'10%', width:'250px', height:'250px', borderRadius:'50%', background:'radial-gradient(circle at 40% 40%, rgba(255, 51, 68, 0.1), transparent)', filter:'blur(50px)', pointerEvents:'none' }} />
+      <div className="contact-accent" data-accent-animate="float" style={{ position:'absolute', top:'30%', right:'5%', width:'180px', height:'180px', borderRadius:'50%', background:'radial-gradient(circle, rgba(245, 166, 35, 0.08), transparent)', filter:'blur(40px)', pointerEvents:'none', animationDelay:'0.5s' }} />
     </section>
   );
 }

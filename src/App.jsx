@@ -19,6 +19,9 @@ import ContactScene from './components/ContactScene';
 import CareerNotch from './components/CareerNotch';
 import MusicPlayer from './components/MusicPlayer';
 import Galaxy from './components/Galaxy';
+import ExperienceNotice from './components/ExperienceNotice';
+import { Analytics } from '@vercel/analytics/react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
   useEngine();
@@ -26,10 +29,12 @@ function App() {
   const [loaded, setLoaded] = useState(false);
   const progress = useStore((state) => state.scrollProgress);
   const activeTrack = useStore((state) => state.activeTrack);
+  const isExperienceUnlocked = useStore((state) => state.isExperienceUnlocked);
   const handleLoadComplete = useCallback(() => setLoaded(true), []);
 
   return (
     <>
+      <Analytics />
       {!loaded && <LoadingScreen onComplete={handleLoadComplete} />}
 
       {/* Scroll progress bar */}
@@ -51,14 +56,22 @@ function App() {
 
       <CursorController />
       <SceneController />
-      <NavBar />
-      <CareerNotch />
+      <ExperienceNotice />
+      
+      <div 
+        inert={!isExperienceUnlocked ? "" : undefined}
+        style={{ pointerEvents: isExperienceUnlocked ? 'auto' : 'none' }}
+      >
+        <NavBar />
+        <CareerNotch />
 
-      {/* Bottom-right ambient music control */}
-      <MusicPlayer />
+        {/* Bottom-right ambient music control */}
+        <MusicPlayer />
+      </div>
 
       {/* Global Galaxy Background */}
       <div
+        inert={!isExperienceUnlocked ? "" : undefined}
         aria-hidden="true"
         style={{
           position: 'fixed',
@@ -85,21 +98,32 @@ function App() {
             opacity: 0.15,
           }}
         />
-        <Galaxy 
-          mouseRepulsion={true}
-          mouseInteraction={true}
-          density={0.8}
-          glowIntensity={0.15}
-          saturation={0.05} // nearly monochrome
-          starSpeed={0.08} // very slow
-          speed={0.4} // very slow
-          transparent={true}
-          twinkleIntensity={0.15}
-          hueShift={activeTrack === 'ml' ? 190 : 30} // cyan for ml, amber for software
-        />
+        <ErrorBoundary>
+          <Galaxy 
+            mouseRepulsion={true}
+            mouseInteraction={true}
+            density={0.8}
+            glowIntensity={0.15}
+            saturation={0.05} // nearly monochrome
+            starSpeed={0.08} // very slow
+            speed={0.4} // very slow
+            transparent={true}
+            disableAnimation={!isExperienceUnlocked}
+            twinkleIntensity={0.15}
+            hueShift={activeTrack === 'ml' ? 190 : 30} // cyan for ml, amber for software
+          />
+        </ErrorBoundary>
       </div>
 
-      <main id="main-content" style={{ position: 'relative', zIndex: 2 }}>
+      <main 
+        id="main-content" 
+        inert={!isExperienceUnlocked ? "" : undefined}
+        style={{ 
+          position: 'relative', 
+          zIndex: 2,
+          pointerEvents: isExperienceUnlocked ? 'auto' : 'none'
+        }}
+      >
         <HeroScene />
         <AboutScene />
         <MindsetScene />

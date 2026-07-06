@@ -9,6 +9,7 @@ export function useEngine() {
   const setTime = useStore((state) => state.setTime);
   const setMouse = useStore((state) => state.setMouse);
   const setFps = useStore((state) => state.setFps);
+  const isExperienceUnlocked = useStore((state) => state.isExperienceUnlocked);
 
   useEffect(() => {
     // ─────────────────────────────────────────────────────────────────────
@@ -23,6 +24,13 @@ export function useEngine() {
       wheelMultiplier: 1,
       touchMultiplier: 2,
     });
+    
+    // Stop immediately if experience isn't unlocked
+    if (!isExperienceUnlocked) {
+      lenis.stop();
+      window.scrollTo(0, 0);
+    }
+    
     window.__lenis = lenis;
 
     // ─────────────────────────────────────────────────────────────────────
@@ -99,16 +107,28 @@ export function useEngine() {
     window.addEventListener('resize', handleResize, { passive: true });
 
     // ─────────────────────────────────────────────────────────────────────
-    // 7. Cleanup on unmount
+    // 7. Watch for unlock state to start/stop Lenis
+    // ─────────────────────────────────────────────────────────────────────
+    if (isExperienceUnlocked) {
+      window.scrollTo(0, 0); // Ensure starting at top
+      lenis.start();
+      ScrollTrigger.update();
+    } else {
+      lenis.stop();
+      window.scrollTo(0, 0);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 8. Cleanup on unmount
     // ─────────────────────────────────────────────────────────────────────
     return () => {
       lenis.destroy();
       gsap.ticker.remove(tick);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      // ScrollTrigger instance kills should be handled by their respective component context reverting
     };
-  }, [setScroll, setTime, setMouse, setFps]);
+  }, [setScroll, setTime, setMouse, setFps, isExperienceUnlocked]);
 
   return null;
 }

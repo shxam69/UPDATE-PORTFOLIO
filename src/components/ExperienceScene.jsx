@@ -53,7 +53,7 @@ export default function ExperienceScene() {
         <div className="sec-label reveal-up">PROFESSIONAL EXPERIENCE</div>
         <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>WORK JOURNAL</h2>
         
-        <div className="experience-grid reveal-up">
+        <div className="experience-grid" data-reveal="up">
           {/* Tab Sidebar */}
           <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', borderLeft: '1px dashed var(--glass-border)', paddingLeft: '32px', marginLeft: '6px' }}>
             <div style={{ 

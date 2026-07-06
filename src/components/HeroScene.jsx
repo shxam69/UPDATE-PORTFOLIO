@@ -6,6 +6,8 @@ import { TRACK_CONTENT } from '../data/trackContent';
 import StarBorder from './StarBorder';
 import { useSpotlight } from '../hooks/useSpotlight';
 import Saturn from './Saturn';
+import { trackEvent } from '../utils/analytics';
+import { ErrorBoundary } from './ErrorBoundary';
 
 /** HERO SCENE — Premium entrance with parallax text + Career Mode identity
  *
@@ -25,6 +27,7 @@ export default function HeroScene() {
   const cardRef = useRef(null);
   const activeTrack = useStore((state) => state.activeTrack);
   const heroReplayKey = useStore((state) => state.heroReplayKey);
+  const isExperienceUnlocked = useStore((state) => state.isExperienceUnlocked);
   const { onMouseMove: cardSpotlight, onMouseLeave: cardSpotlightLeave } = useSpotlight(cardRef);
 
 
@@ -32,17 +35,18 @@ export default function HeroScene() {
   // switch (heroReplayKey changes), per the "replay Hero entrance
   // animation" requirement.
   useEffect(() => {
+    // Return early if the entry gate hasn't been passed yet
+    if (!isExperienceUnlocked) return;
+
     const ctx = gsap.context(() => {
-      // Reset to the pre-animation state first so the replay is a real
-      // replay, not a no-op (elements are already at rest after the
-      // first run).
+      // Re-enable and fix the animation with a short delay instead of 3 seconds
       gsap.set(containerRef.current, { scale: 0.96, opacity: 0 });
       gsap.set('.hero-char', { y: 60, opacity: 0 });
       gsap.set('.hero-fade', { y: 20, opacity: 0 });
       gsap.set('.hero-cta', { y: 20, opacity: 0 });
 
       const tl = gsap.timeline({ 
-        delay: 3,
+        delay: 0.2, // Short delay to wait for layout/modal fade
         defaults: { ease: 'power3.out' },
         scrollTrigger: {
           trigger: heroRef.current,
@@ -61,7 +65,7 @@ export default function HeroScene() {
     }, heroRef);
 
     return () => ctx.revert();
-  }, [heroReplayKey]);
+  }, [heroReplayKey, isExperienceUnlocked]);
 
   // Crossfade the identity card whenever the career mode changes
   useEffect(() => {
@@ -198,6 +202,7 @@ export default function HeroScene() {
                 speed="6s"
                 className={`${track.btnClass} magnetic`}
                 style={{ alignSelf: 'flex-start' }}
+                onClick={() => trackEvent('Resume Downloaded', { track: activeTrack })}
               >
                 {track.resumeLabel}
               </StarBorder>
@@ -247,7 +252,9 @@ export default function HeroScene() {
           opacity: 1,
         }}
       >
-        <Saturn />
+        <ErrorBoundary>
+          <Saturn />
+        </ErrorBoundary>
       </div>
     </section>
   );

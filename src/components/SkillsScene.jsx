@@ -75,11 +75,11 @@ export default function SkillsScene() {
           TECH STACK
         </h2>
 
-        <div className="reveal-up" style={{ marginTop: 'var(--space-12)' }}>
+        <div data-reveal="left" style={{ marginTop: 'var(--space-12)' }}>
           <LogoLoop items={items} accent={accent} />
-          <div style={{ marginTop: 'var(--space-6)' }}>
-            <LogoLoop items={[...items].reverse()} accent={accent} reverse={true} />
-          </div>
+        </div>
+        <div data-reveal="right" style={{ marginTop: 'var(--space-6)' }}>
+          <LogoLoop items={[...items].reverse()} accent={accent} reverse={true} />
         </div>
       </div>
     </section>

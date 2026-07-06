@@ -10,7 +10,7 @@ const certs = [
   { id: 'c4', title: 'Salesforce Development', org: 'Salesforce', desc: 'Enterprise systems credential centered on database integrations, Apex transaction concurrency control, and multi-tenant security architecture.', imgStr: 'SFDC' }
 ];
 
-function CertCard({ cert, onClick }) {
+function CertCard({ cert, onClick, index }) {
   const cardRef = useRef(null);
   const { onMouseMove, onMouseLeave } = useSpotlight(cardRef);
 
@@ -21,7 +21,8 @@ function CertCard({ cert, onClick }) {
   return (
     <div
       ref={cardRef}
-      className="glass-card-premium reveal-up explore-hover"
+      className="glass-card-premium explore-hover"
+      data-reveal={index % 2 === 0 ? "left" : "right"}
       onClick={onClick}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
@@ -71,12 +72,12 @@ export default function CertificationsScene() {
   return (
     <section id="certifications" className="scene">
       <div className="sec-wrap">
-        <div className="sec-label reveal-up">CERTIFICATIONS &amp; CREDENTIALS</div>
-        <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>PROFESSIONAL CERTIFICATIONS</h2>
+        <div className="sec-label" data-reveal="up">CERTIFICATIONS &amp; CREDENTIALS</div>
+        <h2 className="sec-title" data-reveal="up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>PROFESSIONAL CERTIFICATIONS</h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '24px' }}>
-          {certs.map(cert => (
-            <CertCard key={cert.id} cert={cert} onClick={() => setActiveCert(cert)} />
+          {certs.map((cert, index) => (
+            <CertCard key={cert.id} cert={cert} index={index} onClick={() => setActiveCert(cert)} />
           ))}
         </div>
       </div>

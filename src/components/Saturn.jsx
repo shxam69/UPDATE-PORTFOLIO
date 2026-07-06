@@ -2,6 +2,7 @@ import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useTexture, Environment } from '@react-three/drei';
 import * as THREE from 'three';
+import { useStore } from '../store';
 
 // ------------------------------------------------------------------
 // INNER PLANET COMPONENT (Memoized to prevent unnecessary re-renders)
@@ -9,6 +10,7 @@ import * as THREE from 'three';
 const SaturnPlanet = React.memo(({ isMobile }) => {
   const groupRef = useRef(null);
   const planetRef = useRef(null);
+  const isExperienceUnlocked = useStore((state) => state.isExperienceUnlocked);
 
   // Load the generated high-res NASA-quality textures
   // Preloading these outside component would be ideal for strict performance,
@@ -28,7 +30,7 @@ const SaturnPlanet = React.memo(({ isMobile }) => {
   const segments = isMobile ? 64 : 128;
 
   useFrame((state, delta) => {
-    if (planetRef.current) {
+    if (planetRef.current && isExperienceUnlocked) {
       // Extremely slow continuous axial rotation on its Y-axis
       // ~1 full rotation every 60-90 seconds (approx 0.01 rad/s)
       planetRef.current.rotation.y += delta * 0.01;

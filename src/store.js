@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { trackEvent } from './utils/analytics';
 
 // Scene metadata for cinematic orchestration.
 // NOTE: only `id`, `index`, `name`, and `scrollRange` are read anywhere in the
@@ -31,6 +32,15 @@ function getInitialTrack() {
   }
 }
 
+function getInitialPrivacyState() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.sessionStorage.getItem('portfolio-privacy-confirmed') === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export const useStore = create((set, get) => ({
   // Scroll state
   scroll: 0,
@@ -59,6 +69,10 @@ export const useStore = create((set, get) => ({
   // Performance monitoring
   fps: 60,
   
+  // Experience lock state
+  isExperienceUnlocked: getInitialPrivacyState(),
+  
+  
   // Setters
   setActiveTrack: (activeTrack) => {
     if (activeTrack === get().activeTrack) return;
@@ -67,6 +81,11 @@ export const useStore = create((set, get) => ({
     } catch {
       // ignore write failures (e.g. Safari private mode)
     }
+    
+    // Analytics
+    const trackName = activeTrack === 'ml' ? 'Machine Learning Engineer' : 'Software Engineer';
+    trackEvent(`Career Mode Changed — ${trackName}`);
+    
     set((state) => ({ activeTrack, heroReplayKey: state.heroReplayKey + 1 }));
   },
   setScroll: (scroll, scrollProgress) => {
@@ -92,6 +111,7 @@ export const useStore = create((set, get) => ({
   setTime: (time) => set({ time }),
   setMouse: (mouseX, mouseY) => set({ mouseX, mouseY }),
   setFps: (fps) => set({ fps }),
+  setExperienceUnlocked: (isExperienceUnlocked) => set({ isExperienceUnlocked }),
 }));
 
 // Fallback compatibility

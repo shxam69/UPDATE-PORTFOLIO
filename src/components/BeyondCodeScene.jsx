@@ -2,10 +2,10 @@ export default function BeyondCodeScene() {
   return (
     <section id="beyond-code" className="scene" style={{ background: 'linear-gradient(to bottom, transparent, rgba(20,24,32,0.5), transparent)' }}>
       <div className="sec-wrap">
-        <div className="sec-label reveal-up">ATHLETIC RIGOR & DISCIPLINE</div>
-        <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>BEYOND CODE</h2>
+        <div className="sec-label" data-reveal="up">ATHLETIC RIGOR & DISCIPLINE</div>
+        <h2 className="sec-title" data-reveal="up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>BEYOND CODE</h2>
         
-        <div className="reveal-up solid-panel" style={{ padding: '60px', display: 'flex', flexDirection: 'column', gap: '40px', position: 'relative', overflow: 'hidden' }}>
+        <div data-reveal="up" className="solid-panel" style={{ padding: '60px', display: 'flex', flexDirection: 'column', gap: '40px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ zIndex: 1, maxWidth: '800px' }}>
             <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.8rem', color: 'var(--amber)', letterSpacing: '0.15em', marginBottom: '16px', fontWeight: 600 }}>
               College Basketball Champion

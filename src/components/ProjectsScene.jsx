@@ -21,40 +21,13 @@ export default function ProjectsScene() {
   const projects = getProjectsByTrack(activeTrack);
   const trackColor = activeTrack === 'ml' ? 'var(--cyan)' : 'var(--amber)';
 
-  // Stagger cards in whenever the visible set changes (Career Mode switch or scroll-in)
-  useEffect(() => {
-    const cards = cardsContainerRef.current ? Array.from(cardsContainerRef.current.children) : [];
-    if (!cards.length) return;
-
-    const existingTrigger = ScrollTrigger.getAll().find((t) => t.trigger === cardsContainerRef.current);
-    if (existingTrigger) existingTrigger.kill();
-
-    gsap.fromTo(
-      cards,
-      { opacity: 0, x: (i) => (i % 2 === 0 ? -40 : 40) },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: cardsContainerRef.current,
-          start: 'top 90%',
-          toggleActions: 'play none none reset',
-        },
-        onComplete: () => ScrollTrigger.refresh(),
-      }
-    );
-  }, [activeTrack]);
-
   return (
     <section id="projects" className="scene">
       <div className="sec-wrap">
         {/* Section header — reflects the active Career Mode, no local toggle (Hero owns that control) */}
         <div style={{ marginBottom: 'var(--space-12)' }}>
           <div
-            className="reveal-up"
+            data-reveal="up"
             style={{
               fontFamily: 'DM Mono, monospace',
               fontSize: 'var(--text-xs)',
@@ -66,7 +39,7 @@ export default function ProjectsScene() {
           >
             {activeTrack === 'ml' ? 'Machine Learning Projects' : 'Software Engineering Projects'}
           </div>
-          <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px', marginBottom: 'var(--space-12)' }}>
+          <h2 className="sec-title" data-reveal="up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px', marginBottom: 'var(--space-12)' }}>
             SELECTED WORK
           </h2>
         </div>
@@ -81,13 +54,13 @@ export default function ProjectsScene() {
             marginBottom: 'var(--space-24)',
           }}
         >
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} onOpen={() => setActiveProject(project)} />
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} onOpen={() => setActiveProject(project)} />
           ))}
         </div>
 
         {/* Additional sections */}
-        <div className="reveal-up" style={{ marginBottom: 'var(--space-24)' }}>
+        <div data-reveal="up" style={{ marginBottom: 'var(--space-24)' }}>
           <div
             style={{
               fontFamily: 'DM Mono, monospace',
@@ -136,7 +109,7 @@ export default function ProjectsScene() {
         </div>
 
         {/* Active development section */}
-        <div className="reveal-up">
+        <div data-reveal="up">
           <div
             style={{
               fontFamily: 'DM Mono, monospace',

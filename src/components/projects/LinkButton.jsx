@@ -1,3 +1,5 @@
+import { trackEvent } from '../../utils/analytics';
+
 export default function LinkButton({ label, href, note }) {
   if (!href) return null;
 
@@ -9,6 +11,10 @@ export default function LinkButton({ label, href, note }) {
         rel="noreferrer"
         className="magnetic"
         aria-label={`${label} — opens in new tab`}
+        onClick={() => {
+          if (label === 'Live Demo') trackEvent('Live Demo Clicked', { url: href });
+          if (label === 'GitHub') trackEvent('GitHub Clicked', { url: href });
+        }}
         style={{
           display: 'inline-flex',
           alignItems: 'center',

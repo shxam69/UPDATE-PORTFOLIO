@@ -35,12 +35,12 @@ export default function MilestonesScene() {
   return (
     <section id="milestones" className="scene">
       <div className="sec-wrap">
-        <div className="sec-label reveal-up">RECOGNITION & AWARDS</div>
-        <h2 className="sec-title reveal-up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>KEY AWARDS & ACHIEVEMENTS</h2>
+        <div className="sec-label" data-reveal="up">RECOGNITION & AWARDS</div>
+        <h2 className="sec-title" data-reveal="up" style={{ fontFamily: 'Bebas Neue', letterSpacing: '2px' }}>KEY AWARDS & ACHIEVEMENTS</h2>
         
         <div style={{ position: 'relative', paddingLeft: '40px', borderLeft: '1px dashed var(--glass-border)' }}>
           {milestones.map((m, i) => (
-            <div key={i} className="reveal-up" style={{ position: 'relative', marginBottom: i === milestones.length - 1 ? '0' : '60px' }}>
+            <div key={i} data-reveal={i % 2 === 0 ? "left" : "right"} style={{ position: 'relative', marginBottom: i === milestones.length - 1 ? '0' : '60px' }}>
               <div style={{
                 position: 'absolute', left: '-47px', top: '0', width: '12px', height: '12px',
                 background: 'var(--ink)', border: '2px solid var(--amber)', borderRadius: '50%',
