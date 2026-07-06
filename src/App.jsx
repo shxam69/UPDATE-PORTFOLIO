@@ -19,6 +19,7 @@ import ContactScene from './components/ContactScene';
 import CareerNotch from './components/CareerNotch';
 import MusicPlayer from './components/MusicPlayer';
 import Galaxy from './components/Galaxy';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   useEngine();
@@ -144,6 +145,7 @@ function App() {
           </div>
         </footer>
       </main>
+      <Analytics />
     </>
   );
 }
