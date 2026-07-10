@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store';
 import { trackEvent } from '../utils/analytics';
+import { startAmbient } from '../hooks/useAudio';
 
 export default function ExperienceNotice() {
   const [isVisible, setIsVisible] = useState(false);
@@ -41,6 +42,10 @@ export default function ExperienceNotice() {
 
   const handleConfirm = () => {
     setIsClosing(true);
+    
+    // Start ambient music and notify UI
+    startAmbient();
+    window.dispatchEvent(new Event('ambient-started'));
     
     // Restore focus and scroll
     if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {

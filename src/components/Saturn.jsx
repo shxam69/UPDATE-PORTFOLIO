@@ -67,9 +67,9 @@ const SaturnPlanet = React.memo(({ isMobile }) => {
             side={THREE.DoubleSide}
             transparent={true}
             opacity={1.0}
-            roughness={0.6}
+            roughness={0.8}
             metalness={0.1}
-            alphaTest={0.05}
+            alphaTest={0.01}
             depthWrite={false}
           />
         </mesh>
@@ -107,18 +107,14 @@ const Saturn = React.memo(() => {
       }}
       style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
     >
-      {/* 
-        HemisphereLight provides a subtle, performant global illumination
-        without the heavy cost of HDR environments.
-      */}
-      <hemisphereLight intensity={0.15} color="#ffffff" groundColor="#000000" />
+      <hemisphereLight intensity={0.25} color="#ffffff" groundColor="#000000" />
 
       {/* 
-        Directional Rim Light (Top-Left)
-        Provides dramatic shading without real-time shadow map calculations.
+        Directional Main Light (Top-Left, Front)
+        Illuminates the rings and the planet surface realistically.
       */}
       <directionalLight
-        position={[-15, 6, -6]}
+        position={[-15, 6, 6]}
         intensity={3.5}
         color="#fff1e0"
       />

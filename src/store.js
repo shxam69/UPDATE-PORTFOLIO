@@ -22,14 +22,8 @@ export const SCENES = {
 const TRACK_STORAGE_KEY = 'career-mode-track';
 
 function getInitialTrack() {
-  if (typeof window === 'undefined') return 'software';
-  try {
-    const stored = window.localStorage.getItem(TRACK_STORAGE_KEY);
-    return stored === 'ml' ? 'ml' : 'software';
-  } catch {
-    // localStorage can throw in some privacy modes — fall back silently
-    return 'software';
-  }
+  // Always default to software engineer on initial load
+  return 'software';
 }
 
 function getInitialPrivacyState() {

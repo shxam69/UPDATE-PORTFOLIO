@@ -1551,12 +1551,12 @@ main {
     position: relative;
     bottom: auto;
     right: auto;
-    width: 60vw;
-    height: 60vw;
+    width: 140vw;
+    height: 140vw;
     min-width: unset;
     min-height: unset;
-    margin-top: 60px;
-    margin-left: -20px; /* Position toward the left */
+    margin-top: 40px;
+    margin-left: -65vw; /* Cinematic crop: push center to the left edge */
     align-self: flex-start;
     pointer-events: none;
     z-index: 0;
@@ -1565,8 +1565,8 @@ main {
 
 @media (max-width: 480px) {
   .hero-accent-wrapper {
-    width: 80vw;
-    height: 80vw;
-    margin-left: -30px;
+    width: 160vw;
+    height: 160vw;
+    margin-left: -75vw;
   }
 }

@@ -4,10 +4,14 @@ import { startAmbient, stopAmbient } from '../hooks/useAudio';
 const PREF_KEY = 'ambient-music-enabled';
 
 function getStoredPref() {
-  try { return localStorage.getItem(PREF_KEY) === 'true'; } catch { return false; }
+  try { 
+    const stored = sessionStorage.getItem(PREF_KEY);
+    // Default to true if not explicitly set to 'false'
+    return stored !== 'false';
+  } catch { return true; }
 }
 function setStoredPref(val) {
-  try { localStorage.setItem(PREF_KEY, val ? 'true' : 'false'); } catch {}
+  try { sessionStorage.setItem(PREF_KEY, val ? 'true' : 'false'); } catch {}
 }
 
 export default function MusicPlayer() {
@@ -17,20 +21,34 @@ export default function MusicPlayer() {
 
   // On mount: if user had it on before, resume (but only after first interaction)
   useEffect(() => {
+    const handleFirst = () => {
+      if (!startedRef.current) {
+        startedRef.current = true;
+        startAmbient();
+        setPlaying(true);
+      }
+      window.removeEventListener('click', handleFirst);
+      window.removeEventListener('keydown', handleFirst);
+    };
+
     if (getStoredPref()) {
-      // Can't autoplay — wait for first user interaction
-      const handleFirst = () => {
-        if (!startedRef.current) {
-          startedRef.current = true;
-          startAmbient();
-          setPlaying(true);
-        }
-        window.removeEventListener('click', handleFirst);
-        window.removeEventListener('keydown', handleFirst);
-      };
       window.addEventListener('click', handleFirst, { once: true });
       window.addEventListener('keydown', handleFirst, { once: true });
     }
+
+    // Sync with external start (e.g. from Privacy/Experience Notice)
+    const handleExternalStart = () => {
+      startedRef.current = true;
+      setPlaying(true);
+      setStoredPref(true);
+    };
+    window.addEventListener('ambient-started', handleExternalStart);
+
+    return () => {
+      window.removeEventListener('click', handleFirst);
+      window.removeEventListener('keydown', handleFirst);
+      window.removeEventListener('ambient-started', handleExternalStart);
+    };
   }, []);
 
   const toggle = useCallback(() => {

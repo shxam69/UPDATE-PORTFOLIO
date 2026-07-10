@@ -1,146 +1,56 @@
 /**
- * Ambient Synth Engine — Web Audio API
- * Creates a warm, spacey drone: no audio files, no copyright.
- *
- * Architecture:
- *   3 × detuned sine oscillators → GainNode (LFO-modulated) → master gain → destination
- *   + 1 high-pass filtered pink noise layer for texture
+ * Audio Engine — HTML5 Audio
+ * Manages background music and UI sounds.
  */
 
-let ctx = null;
-let masterGain = null;
-let nodes = [];          // all running nodes for cleanup
-let lfoInterval = null;
+// Create exactly ONE logical background audio instance
+let bgMusic = null;
 
-function getCtx() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
+// ---------------------------------------------------------
+// EXACT LOCATION WHERE I CAN CHANGE THE SONG LATER:
+// Change the path below to point to a different MP3 file.
+const AUDIO_FILE_PATH = '/audio/ambient.mp3';
+// ---------------------------------------------------------
+
+// ---------------------------------------------------------
+// EXACT LOCATION WHERE I CAN CHANGE THE VOLUME LATER:
+// Default volume (0.0 to 1.0)
+const DEFAULT_VOLUME = 0.10;
+// ---------------------------------------------------------
+
+function getBgMusic() {
+  if (typeof window === 'undefined') return null;
+  if (!bgMusic) {
+    bgMusic = new Audio(AUDIO_FILE_PATH);
+    bgMusic.loop = true;
+    bgMusic.volume = DEFAULT_VOLUME;
   }
-  return ctx;
-}
-
-/** Create a sine oscillator with a slow LFO on its gain */
-function createDrone(ac, freq, gainVal, lfoRate) {
-  const osc = ac.createOscillator();
-  const gain = ac.createGain();
-
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-
-  // LFO (very slow volume breathing)
-  const lfo = ac.createOscillator();
-  const lfoGain = ac.createGain();
-  lfo.type = 'sine';
-  lfo.frequency.value = lfoRate;
-  lfoGain.gain.value = gainVal * 0.3;  // depth = 30% of base
-
-  lfo.connect(lfoGain);
-  lfoGain.connect(gain.gain);
-
-  gain.gain.value = gainVal;
-
-  osc.connect(gain);
-  gain.connect(masterGain);
-
-  osc.start();
-  lfo.start();
-
-  return [osc, gain, lfo, lfoGain];
-}
-
-/** Pink-ish noise: fills texture between the drones */
-function createNoisePad(ac) {
-  const bufSize = ac.sampleRate * 2;
-  const buf = ac.createBuffer(1, bufSize, ac.sampleRate);
-  const data = buf.getChannelData(0);
-
-  // White noise filtered to lower frequencies
-  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-  for (let i = 0; i < bufSize; i++) {
-    const white = Math.random() * 2 - 1;
-    b0 = 0.99886 * b0 + white * 0.0555179;
-    b1 = 0.99332 * b1 + white * 0.0750759;
-    b2 = 0.96900 * b2 + white * 0.1538520;
-    b3 = 0.86650 * b3 + white * 0.3104856;
-    b4 = 0.55000 * b4 + white * 0.5329522;
-    b5 = -0.7616 * b5 - white * 0.0168980;
-    data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) / 7;
-    b6 = white * 0.115926;
-  }
-
-  const source = ac.createBufferSource();
-  source.buffer = buf;
-  source.loop = true;
-
-  // High-pass filter to remove muddy lows from noise
-  const hpf = ac.createBiquadFilter();
-  hpf.type = 'highpass';
-  hpf.frequency.value = 600;
-  hpf.Q.value = 0.5;
-
-  const noiseGain = ac.createGain();
-  noiseGain.gain.value = 0.008;  // whisper-quiet texture
-
-  source.connect(hpf);
-  hpf.connect(noiseGain);
-  noiseGain.connect(masterGain);
-  source.start();
-
-  return [source, hpf, noiseGain];
+  return bgMusic;
 }
 
 export function startAmbient() {
-  const ac = getCtx();
-
-  if (ac.state === 'suspended') {
-    ac.resume();
+  const audio = getBgMusic();
+  if (!audio) return;
+  
+  // Handle audio.play() as a Promise gracefully
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      console.warn("Audio playback failed (browser autoplay restriction or missing file):", error);
+    });
   }
-
-  if (nodes.length > 0) return; // already running
-
-  masterGain = ac.createGain();
-  masterGain.gain.value = 0;           // start silent, fade in
-  masterGain.connect(ac.destination);
-
-  // Space drone chord: A1 → E2 → A2 → C#3 (open fifth + major third)
-  // Slightly detuned for richness
-  const drones = [
-    createDrone(ac, 55.00,  0.18, 0.04),   // A1 — deep root
-    createDrone(ac, 55.20,  0.12, 0.031),  // A1 +4¢ detuned
-    createDrone(ac, 82.41,  0.10, 0.025),  // E2 — perfect fifth
-    createDrone(ac, 110.00, 0.08, 0.019),  // A2 — octave
-    createDrone(ac, 138.59, 0.05, 0.013),  // C#3 — gentle color
-    createDrone(ac, 164.81, 0.04, 0.010),  // E3 — high overtone
-  ];
-  const noiseNodes = createNoisePad(ac);
-
-  nodes = [...drones.flat(), ...noiseNodes];
-
-  // Fade in over 3 seconds
-  masterGain.gain.setValueAtTime(0, ac.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.55, ac.currentTime + 3.0);
 }
 
 export function stopAmbient() {
-  if (!masterGain || !ctx) return;
-
-  // Fade out over 1.5 seconds then kill nodes
-  const now = ctx.currentTime;
-  masterGain.gain.setValueAtTime(masterGain.gain.value, now);
-  masterGain.gain.linearRampToValueAtTime(0, now + 1.5);
-
-  setTimeout(() => {
-    nodes.forEach((n) => {
-      try { n.stop?.(); } catch (_) {}
-      try { n.disconnect(); } catch (_) {}
-    });
-    nodes = [];
-    masterGain = null;
-  }, 1600);
+  const audio = getBgMusic();
+  if (!audio) return;
+  audio.pause();
 }
 
 export function isAmbientPlaying() {
-  return nodes.length > 0;
+  const audio = getBgMusic();
+  if (!audio) return false;
+  return !audio.paused;
 }
 
 /** Very short UI blip: sine ping */

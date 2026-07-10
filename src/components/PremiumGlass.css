@@ -80,3 +80,15 @@
 .glass-card-tilt {
   transform-style: preserve-3d;
 }
+
+/* ── Container for FallingText ───────────────────────────────── */
+.falling-heading-container {
+  min-height: clamp(180px, 20vw, 320px);
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .falling-heading-container {
+    min-height: clamp(120px, 35vw, 220px);
+  }
+}

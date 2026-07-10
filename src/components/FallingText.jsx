@@ -2,10 +2,12 @@ import { useRef, useState, useEffect } from 'react';
 import Matter from 'matter-js';
 import './FallingText.css';
 
+const EMPTY_ARRAY = Object.freeze([]);
+
 const FallingText = ({
   className = '',
   text = '',
-  highlightWords = [],
+  highlightWords = EMPTY_ARRAY,
   highlightClass = 'highlighted',
   trigger = 'auto',
   backgroundColor = 'transparent',
@@ -17,13 +19,14 @@ const FallingText = ({
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const canvasContainerRef = useRef(null);
+  const isPhysicsActiveRef = useRef(false);
 
   const [effectStarted, setEffectStarted] = useState(false);
 
   // 1. Initialize HTML content
   useEffect(() => {
     if (!textRef.current) return;
-    const words = text.split(' ');
+    const words = text.trim().split(/\s+/);
     const newHTML = words
       .map(word => {
         const isHighlighted = highlightWords.some(hw => word.startsWith(hw));
@@ -48,7 +51,7 @@ const FallingText = ({
             setEffectStarted(false);
           }
         },
-        { threshold: 0.1 }
+        { root: null, rootMargin: '0px', threshold: 0.25 }
       );
       observer.observe(containerRef.current);
       return () => observer.disconnect();
@@ -58,6 +61,10 @@ const FallingText = ({
   // 3. Physics Engine Setup
   useEffect(() => {
     if (!effectStarted) return;
+    
+    // Prevent duplicate initializations
+    if (isPhysicsActiveRef.current) return;
+    isPhysicsActiveRef.current = true;
 
     let engine;
     let render;
@@ -73,7 +80,7 @@ const FallingText = ({
       const containerRect = containerRef.current.getBoundingClientRect();
       const width = containerRect.width;
       const height = containerRect.height;
-
+      
       // Wait until layout is fully ready
       if (width <= 0 || height <= 0) {
         initFrameId = requestAnimationFrame(initPhysics);
@@ -126,16 +133,16 @@ const FallingText = ({
 
         const body = Bodies.rectangle(x, y, rect.width, rect.height, {
           render: { fillStyle: 'transparent' },
-          restitution: 0.8,
-          frictionAir: 0.01,
+          restitution: 0.5,
+          frictionAir: 0.02,
           friction: 0.2
         });
 
         Matter.Body.setVelocity(body, {
-          x: (Math.random() - 0.5) * 5,
+          x: (Math.random() - 0.5) * 0.5,
           y: 0
         });
-        Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.05);
+        Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.015);
         return { elem, body };
       }).filter(Boolean);
 
@@ -149,9 +156,9 @@ const FallingText = ({
       // Physics bodies successfully created, now detach from DOM layout
       wordBodies.forEach(({ elem, body }) => {
         elem.style.position = 'absolute';
-        elem.style.left = `${body.position.x - body.bounds.max.x + body.bounds.min.x / 2}px`;
-        elem.style.top = `${body.position.y - body.bounds.max.y + body.bounds.min.y / 2}px`;
-        elem.style.transform = 'none';
+        elem.style.left = `${body.position.x}px`;
+        elem.style.top = `${body.position.y}px`;
+        elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
       });
 
       const mouse = Mouse.create(containerRef.current);
@@ -177,7 +184,10 @@ const FallingText = ({
           elem.style.top = `${y}px`;
           elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
         });
-        Matter.Engine.update(engine);
+        
+        // DO NOT CALL Matter.Engine.update(engine) here!
+        // Runner.run(runner, engine) already handles updates.
+        
         animationFrameId = requestAnimationFrame(updateLoop);
       };
       
@@ -215,6 +225,8 @@ const FallingText = ({
           elem.style.transform = '';
         });
       }
+      
+      isPhysicsActiveRef.current = false;
     };
   }, [effectStarted, gravity, wireframes, backgroundColor, mouseConstraintStiffness]);
 

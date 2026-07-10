@@ -68,15 +68,14 @@ export default function ContactScene() {
           </div>
 
 
-          <div style={{
+          <div className="falling-heading-container" style={{
             fontFamily: 'Bebas Neue',
-            fontSize: 'clamp(2rem, 8vw, 5rem)',
+            fontSize: 'clamp(3rem, 10vw, 6rem)',
             marginTop: '40px',
             marginBottom: 'var(--space-8)',
             lineHeight: 1,
             fontWeight: 700,
             letterSpacing: '0.02em',
-            height: '150px',
             position: 'relative',
             color: '#F8F8F8',
             zIndex: 10,
@@ -87,9 +86,9 @@ export default function ContactScene() {
               trigger="scroll"
               backgroundColor="transparent"
               wireframes={false}
-              gravity={0.55}
+              gravity={0.35}
               fontSize="inherit"
-              mouseConstraintStiffness={0.85}
+              mouseConstraintStiffness={0.3}
             />
           </div>
         </div>
