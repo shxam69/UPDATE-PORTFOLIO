@@ -80,28 +80,13 @@ export default function HeroScene() {
   return (
     <section
       id="hero"
-      className="scene"
+      className="scene hero-scene"
       ref={heroRef}
-      style={{
-        paddingTop: '96px',
-        paddingBottom: '64px',
-        minHeight: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        overflow: 'visible',
-      }}
     >
-      <div className="sec-wrap">
+      <div className="sec-wrap hero-content-wrapper">
         <div
           ref={containerRef}
-          style={{
-            maxWidth: '1250px',
-            width: '100%',
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: 'var(--space-4)',
-          }}
+          className="hero-container"
         >
 
           {/* HERO NAME (primary heading) */}
@@ -155,7 +140,7 @@ export default function HeroScene() {
 
 
           {/* DYNAMIC IDENTITY CARD — swaps with Career Mode (selector lives in NavBar) */}
-          <div className="hero-fade" style={{ opacity: 0, transform: 'translateY(20px)', maxWidth: '620px' }}>
+          <div className="hero-fade hero-card-container" style={{ opacity: 0, transform: 'translateY(20px)' }}>
             <div
               ref={cardRef}
               className="glass-card-premium"
@@ -210,7 +195,7 @@ export default function HeroScene() {
           </div>
 
           {/* SECONDARY ACTIONS */}
-          <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="hero-cta-wrapper">
             <StarBorder
               as="a"
               href="#projects"
@@ -236,25 +221,13 @@ export default function HeroScene() {
 
       </div>
 
-      {/* HERO ACCENT (3D SATURN) - Positioned precisely on lower-right, 70-80% visible */}
-      <div
-        className="hero-accent"
-        style={{
-          position: 'absolute',
-          bottom: '-10%',
-          right: '-10%',
-          width: '35vw',
-          height: '35vw',
-          minWidth: '400px',
-          minHeight: '400px',
-          pointerEvents: 'none',
-          zIndex: 0,
-          opacity: 1,
-        }}
-      >
-        <ErrorBoundary>
-          <Saturn />
-        </ErrorBoundary>
+      {/* HERO ACCENT (3D SATURN) */}
+      <div className="hero-accent-wrapper">
+        <div className="hero-accent">
+          <ErrorBoundary>
+            <Saturn />
+          </ErrorBoundary>
+        </div>
       </div>
     </section>
   );

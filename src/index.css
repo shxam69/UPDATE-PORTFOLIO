@@ -1467,3 +1467,106 @@ main {
   70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   HERO RESPONSIVE LAYOUT FIX
+   ───────────────────────────────────────────────────────────────────────── */
+.hero-scene {
+  padding-top: 96px;
+  padding-bottom: 64px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: visible;
+}
+
+.hero-content-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.hero-container {
+  max-width: 1250px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.hero-card-container {
+  max-width: 620px;
+}
+
+.hero-cta-wrapper {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hero-accent-wrapper {
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 35vw;
+  height: 35vw;
+  min-width: 400px;
+  min-height: 400px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+}
+
+.hero-accent {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile Overrides */
+@media (max-width: 768px) {
+  .hero-scene {
+    height: auto;
+    min-height: 100svh;
+    align-items: flex-start;
+    padding-top: 140px; /* Allow space for navbar and career mode toggle */
+    padding-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero-card-container {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .hero-cta-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .hero-accent-wrapper {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 60vw;
+    height: 60vw;
+    min-width: unset;
+    min-height: unset;
+    margin-top: 60px;
+    margin-left: -20px; /* Position toward the left */
+    align-self: flex-start;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-accent-wrapper {
+    width: 80vw;
+    height: 80vw;
+    margin-left: -30px;
+  }
+}

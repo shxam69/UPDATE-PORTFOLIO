@@ -38,8 +38,8 @@ const SaturnPlanet = React.memo(({ isMobile }) => {
   });
 
   return (
-    // Group tilted on Z-axis by exactly 26.7 degrees (Saturn's actual axial tilt)
-    <group ref={groupRef} rotation={[0, 0, THREE.MathUtils.degToRad(-26.7)]} position={[0, 0, 0]}>
+    // Group tilted on Z-axis (26.7 deg axial tilt) and pitched on X-axis (20 deg) to reveal rings
+    <group ref={groupRef} rotation={[THREE.MathUtils.degToRad(20), 0, THREE.MathUtils.degToRad(-26.7)]} position={[0, 0, 0]}>
       {/* 
         The rotation is strictly applied to the inner group.
         This ensures both the planet and rings spin flawlessly in unison 
@@ -66,10 +66,11 @@ const SaturnPlanet = React.memo(({ isMobile }) => {
             alphaMap={ringAlphaMap}
             side={THREE.DoubleSide}
             transparent={true}
-            opacity={0.9}
+            opacity={1.0}
             roughness={0.6}
             metalness={0.1}
-            alphaTest={0.2} 
+            alphaTest={0.05}
+            depthWrite={false}
           />
         </mesh>
         
