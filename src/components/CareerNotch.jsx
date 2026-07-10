@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { useStore } from '../store';
 import StarBorder from './StarBorder';
 import './CareerNotch.css';
-import { playUISound } from '../hooks/useAudio';
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia
@@ -16,9 +15,6 @@ export default function CareerNotch() {
 
   const handleTrackSwitch = useCallback((nextTrack) => {
     if (nextTrack === activeTrack) return;
-
-    // Career-switch sound
-    playUISound('career');
 
     const lenis = window.__lenis;
     if (lenis) {
@@ -51,7 +47,6 @@ export default function CareerNotch() {
           as="button"
           type="button"
           onClick={() => handleTrackSwitch('software')}
-          onMouseEnter={() => playUISound('hover')}
           color="var(--amber)"
           speed="10s"
           className={`notch-btn ${activeTrack === 'software' ? 'active' : ''}`}
@@ -63,7 +58,6 @@ export default function CareerNotch() {
           as="button"
           type="button"
           onClick={() => handleTrackSwitch('ml')}
-          onMouseEnter={() => playUISound('hover')}
           color="var(--cyan)"
           speed="10s"
           className={`notch-btn ${activeTrack === 'ml' ? 'active ml-active' : ''}`}

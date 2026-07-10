@@ -55,6 +55,8 @@ export function isAmbientPlaying() {
 
 /** Very short UI blip: sine ping */
 export function playUISound(type = 'hover') {
+  return; // Disabled due to missing Web Audio context
+  
   if (typeof window === 'undefined') return;
   // Respect reduced motion preference — skip sounds too
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
