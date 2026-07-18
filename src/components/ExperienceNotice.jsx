@@ -63,6 +63,10 @@ export default function ExperienceNotice() {
       }
       setExperienceUnlocked(true);
       setIsVisible(false);
+
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
     }, 400); // Matches transition duration
   };
 

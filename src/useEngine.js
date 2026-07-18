@@ -59,11 +59,19 @@ export function useEngine() {
     // ─────────────────────────────────────────────────────────────────────
     let frameCount = 0;
     let lastFpsTime = performance.now();
+    let warmupStart = performance.now();
 
     const tick = (time) => {
       // `time` is seconds elapsed since the ticker started (gsap.ticker default)
       lenis.raf(time * 1000);
       setTime(time);
+
+      if (!isExperienceUnlocked) {
+        warmupStart = performance.now(); // Reset warmup while locked
+        lastFpsTime = performance.now();
+        frameCount = 0;
+        return;
+      }
 
       // ─ Performance monitoring (calculate FPS every 500ms) ─
       const now = performance.now();
@@ -75,7 +83,7 @@ export function useEngine() {
         frameCount = 0;
         lastFpsTime = now;
 
-        if (fps < 30 && fps > 0) {
+        if (fps < 30 && fps > 0 && (now - warmupStart > 3000)) {
           console.warn(`⚠ Low FPS detected: ${fps}fps. Consider reducing particles or enabling mobile optimizations.`);
         }
       }

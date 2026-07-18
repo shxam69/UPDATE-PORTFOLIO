@@ -196,6 +196,11 @@ export default function Galaxy({
   const smoothMouseActive = useRef(0.0);
   const programRef = useRef(null);
 
+  const disableAnimationRef = useRef(disableAnimation);
+  useEffect(() => {
+    disableAnimationRef.current = disableAnimation;
+  }, [disableAnimation]);
+
   useEffect(() => {
     if (!ctnDom.current) return;
     const ctn = ctnDom.current;
@@ -265,7 +270,7 @@ export default function Galaxy({
 
     function update(t) {
       animateId = requestAnimationFrame(update);
-      if (!disableAnimation) {
+      if (!disableAnimationRef.current) {
         program.uniforms.uTime.value = t * 0.001;
         program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0;
       }

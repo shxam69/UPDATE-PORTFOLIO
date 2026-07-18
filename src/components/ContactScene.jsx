@@ -153,7 +153,7 @@ export default function ContactScene() {
             }}
           >
             <a
-              href={SOCIAL_LINKS.EMAIL}
+              href="mailto:shyam666fg@gmail.com"
               className="btn-amber magnetic contact-cta-btn"
               onClick={() => trackEvent('Contact Action Clicked', { type: 'Email' })}
               data-reveal="up"
@@ -162,7 +162,7 @@ export default function ContactScene() {
                 fontWeight: 600,
               }}
             >
-              Email Me
+              EMAIL ME
             </a>
             <a
               href={SOCIAL_LINKS.LINKEDIN}
